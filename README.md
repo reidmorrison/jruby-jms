@@ -21,7 +21,7 @@ in JMS I have held off releasing to the wild. I believe it is now of sufficient
 quality and usefulness to release into the wild. In fact it has been used
 in production at an enterprise site for 2 years now.
 
-jruby-jms attempts to "rubify" the Java JMS interface without 
+jruby-jms attempts to "rubify" the Java JMS API without 
 compromising performance. It does this by sprinkling "Ruby-goodness" into the
 existing JMS Java interfaces, I.e. By adding Ruby methods to the existing 
 classes and interfaces. Since jruby-jms exposes the JMS
@@ -50,6 +50,13 @@ of by jruby-jms.
 
 Concepts & Terminology
 ----------------------
+
+### Java Message Service (JMS) API
+
+The JMS API is a standard interface part of Java EE 6 as a way for programs to
+send and receive messages through a messaging and queuing system.
+
+For more information on the JMS API: http://download.oracle.com/javaee/6/api/index.html?javax/jms/package-summary.html
 
 ### Broker / Queue Manager
 
@@ -172,7 +179,7 @@ Meta
 
 * Code: `git clone git://github.com/reidmorrison/jruby-jms.git`
 * Home: <http://github.com/reidmorrison/jruby-jms>
-* Docs: <http://jruby-hornetq.github.com/jruby-jms/>
+* Docs: <http://jruby-jms.github.com/jruby-jms/>
 * Bugs: <http://github.com/reidmorrison/jruby-jms/issues>
 * List: TBA
 * Gems: <http://gemcutter.org/gems/jruby-jms>

@@ -17,7 +17,8 @@
 # For each thread that will be processing messages concurrently a separate
 # session is required. All sessions can share a single connection to the same
 # JMS Provider.
-#Interface javax.jms.Session
+# 
+# Interface javax.jms.Session
 module Java::javaxJms::Session
   # Create a new message instance based on the type of the data being supplied
   #   String (:to_str)    => TextMessage
@@ -42,7 +43,7 @@ module Java::javaxJms::Session
   # Does the session support transactions?
   # I.e. Can/should commit and rollback be called
   def transacted?
-    self.getAcknowledgeMode == javax.jms.Session::SESSION_TRANSACTED
+    self.getAcknowledgeMode == Java::javax.jms.Session::SESSION_TRANSACTED
   end
 
   # Create and open a queue to put or get from. Once the supplied Proc is complete

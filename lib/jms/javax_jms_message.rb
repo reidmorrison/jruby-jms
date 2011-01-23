@@ -15,55 +15,219 @@
 ################################################################################
 
 # Extend JMS Message Interface with Ruby methods
-#Interface javax.jms.Message
 #
 # A Message is the item that can be put on a queue, or obtained from a queue.
+# 
 # A Message consists of 3 major parts:
 #   - Header
+#     Accessible as attributes of the Message class
 #   - Properties
+#     Accessible via [] and []= methods
 #   - Data
+#     The actual data portion of the message
+#     See the specific message types for details on how to access the data
+#     portion of the message
 #
-# The Header can contain one or more header items that are often linked together
-#     :jms_message_id
-#     :jms_correlation_id
-#     :jms_type
-#     :jms_delivery_mode
-#     :jms_expiration
-#     :jms_priority
-#     :jms_redelivered
-#     :jms_reply_to
-#     :jms_timestamp
-#     
-#  The following attributes are accessible in the message:
-#    jmscorrelation_id
-#    jmscorrelation_idas_bytes
-#    jmsdelivery_mode
-#    jmsdestination
-#    jmsexpiration
-#    jmsmessage_id
-#    jmspriority
-#    jmsredelivered
-#    jmsredelivered?
-#    jmsreply_to
-#    jmstimestamp
-#    jmstype
+# For further help on javax.jms.Message
+#   http://download.oracle.com/javaee/6/api/index.html?javax/jms/Message.html
 #
-# The Properties are JMS Properties of the message itself, such as:
-#
-# The Data is the actual payload or raw data being sent or received
-#
+# Interface javax.jms.Message
 module Java::javaxJms::Message
 
-  # Properties Methods
+  # Methods directly exposed from the Java class:
+  
+  # call-seq:
+  #   acknowledge
+  #
+  # Acknowledges all consumed messages of the session of this consumed message
+  #
+
+  # call-seq:
+  #   clear_body
+  #
+  #  Clears out the message body
+  #
+
+  # call-seq:
+  #   clear_properties
+  #
+  #  Clears out the properties of this message
+  #
+  
+  # Header Fields - Attributes of the message
+  
+  # Return the JMS Delivery Mode as a symbol
+  #   :peristent
+  #   :non_peristent
+  #   other: Value from Java::javax.jms.DeliveryMode
+  def jms_delivery_mode
+    case getJMSDeliveryMode
+    when Java::javax.jms.DeliveryMode::PERSISTENT
+      :peristent
+    when Java::javax.jms.DeliveryMode::NON_PERSISTENT
+      :non_peristent
+    else
+      getJMSDeliveryMode
+    end
+  end
+  
+  # Set the JMS Delivery Mode
+  # Valid values for mode
+  #   :peristent
+  #   :non_peristent
+  #   other: Any constant from Java::javax.jms.DeliveryMode
+  def jms_delivery_mode=(mode)
+    val = case mode
+    when :peristent
+      Java::javax.jms.DeliveryMode::PERSISTENT
+    when :non_peristent
+      Java::javax.jms.DeliveryMode::NON_PERSISTENT
+    else
+      mode
+    end
+    self.setJMSDeliveryMode(val)
+  end
+  
+  # Is the message persistent?
+  def persistent?
+    jms_delivery_mode == :persistent
+  end
+  
+  # Returns the Message correlation ID as a String
+  def jms_correlation_id
+    getJMSCorrelationID
+  end
+  
+  # Set the Message correlation ID
+  #   correlation_id: String
+  def jms_correlation_id=(correlation_id)
+    setJMSCorrelationID(correlation_id)
+  end
+  
+  # Returns the Message Destination
+  #  Instance of javax.jms.Destination
+  def jms_destination
+    getJMSDestination
+  end
+  
+  # Set the Message Destination
+  #   jms_destination: Must be an instance of javax.jms.Destination
+  def jms_destination=(destination)
+    setJMSDestination(destination)
+  end
+  
+  # Return the message expiration value as an Integer
+  def jms_expiration
+    getJMSExpiration
+  end
+  
+  # Set the Message expiration value
+  #   expiration: Integer
+  def jms_expiration=(expiration)
+    setJMSExpiration(expiration)
+  end
+  
+  # Returns the Message ID as a String
+  def jms_message_id
+    getJMSMessageID
+  end
+  
+  # Set the Message correlation ID
+  #   correlation_id: String
+  def jms_message_id=(message_id)
+    setJMSMessageID(message_id)
+  end
+  
+  # Returns the Message Priority as an Integer
+  def jms_priority
+    getJMSPriority
+  end
+  
+  # Set the Message priority
+  #   priority: Integer
+  def jms_priority=(priority)
+    setJMSPriority(priority)
+  end
+  
+  # Was the Message redelivered
+  def jms_redelivered?
+    getJMSRedelivered
+  end
+  
+  # Set the Message priority
+  #   priority: Integer
+  def jms_redelivered=(priority)
+    setJMSPriority(priority)
+  end
+  
+  # Returns the Message reply to Destination
+  #  Instance of javax.jms.Destination
+  def jms_reply_to
+    getJMSReplyTo
+  end
+  
+  # Set the Message reply to Destination
+  #   reply_to: Must be an instance of javax.jms.Destination
+  def jms_reply_to=(reply_to)
+    setJMSReplyTo(reply_to)
+  end
+  
+  # Returns the Message timestamp as Java Timestamp Integer
+  #TODO Return Ruby Time object? 
+  def jms_timestamp
+    getJMSTimestamp
+  end
+  
+  # Set the Message reply to Destination
+  #   timestamp: Must be an Java Timestamp Integer
+  #TODO Support Ruby Time
+  def jms_timestamp=(timestamp)
+    setJMSTimestamp(timestamp)
+  end
+  
+  # Returns the Message type as a String
+  def jms_type
+    getJMSType
+  end
+  
+  # Set the Message type
+  #   type: String
+  def jms_type=(type)
+    setJMSType(type)
+  end
+  
+  # Return the attributes (header fields) of the message as a Hash
+  def attributes
+    {
+      :jms_correlation_id => jms_correlation_id,
+      :jms_delivery_mode => jms_delivery_mode,
+      :jms_destination => jms_destination,
+      :jms_expiration => jms_expiration,
+      :jms_message_id => jms_message_id,
+      :jms_priority => jms_priority,
+      :jms_redelivered => jms_redelivered,
+      :jms_reply_to => jms_reply_to,
+      :jms_timestamp => jms_timestamp,
+      :jms_type => jms_type,
+    }
+  end
+
+  # Methods for manipulating the message properties
 
   # Get the value of a property
-  def get_property(key)
+  def [](key)
     getObjectProperty key.to_s
   end
 
   # Set a property
-  def set_property(key, value)
+  def []=(key, value)
     setObjectProperty(key.to_s, value)
+  end
+
+  # Does message include specified property?
+  def include?(key)
+    # Ensure a Ruby true is returned
+    property_exists key == true
   end
 
   # Return Properties as a hash
@@ -89,83 +253,8 @@ module Java::javaxJms::Message
     end
   end
 
-  # Does message include specified property?
-  def include_property?(key)
-    # Ensure a Ruby true is returned
-    property_exists key == true
-  end
-
-  # JMS Getter and setters since JRuby does not detect them correctly
-  #alias jms_correlation_id getJMSCorrelationID
-  #alias jms_correlation_id= setJMSCorrelationID
-
-  # Header Fields
-
-  # Set Header fields from those in a hash
-  def header=(h)
-    h.each do |key,val|
-      case key.to_sym
-      when :jms_correlation_id
-        self.jMSCorrelationID = val
-      when :jms_delivery_mode
-        self.jMSDeliveryMode = case val
-        when :peristent
-          Java::javax.jms.DeliveryMode::PERSISTENT
-        when :non_peristent
-          Java::javax.jms.DeliveryMode::NON_PERSISTENT
-        else
-          val
-        end
-      when :jms_destination
-        # Not possible from string, has to be a Destination Object that we cannot create here :(
-        self.jMSDestination = val
-      when :jms_expiration
-        self.jMSExpiration = val
-      when :jms_message_id
-        self.jMSMessageID = val
-      when :jms_priority
-        self.jMSPriority = val
-      when :jms_redelivered
-        self.jMSRedelivered = val
-      when :jms_reply_to
-        # Not possible from string, has to be a Destination Object that we cannot create here :(
-        self.jMSReplyTo = val
-      when :jms_timestamp
-        self.jMSTimestamp = val
-      when :jms_type
-        self.jMSType = val
-      else
-        raise "Invalid Descriptor key:#{key} supplied to Message::descriptor="
-      end
-    end
-  end
-
-  # Extract Header fields as a Hash from JMS Message
-  def header
-    delivery_mode = case jMSDeliveryMode
-    when Java::javax.jms.DeliveryMode::PERSISTENT
-      :peristent
-    when Java::javax.jms.DeliveryMode::NON_PERSISTENT
-      :non_peristent
-    else
-      nil
-    end
-
-    {
-      :jms_correlation_id => jMSCorrelationID,
-      :jms_delivery_mode => delivery_mode,
-      :jms_destination => jMSDestination,
-      :jms_expiration => jMSExpiration,
-      :jms_message_id => jMSMessageID,
-      :jms_priority => jMSPriority,
-      :jms_redelivered => jMSRedelivered,
-      :jms_reply_to => jMSReplyTo,
-      :jms_timestamp => jMSTimestamp,
-      :jms_type => jMSType,
-    }
-  end
-
   def inspect
-    "#{self.class.name}: #{data}\nHeader: #{header.inspect}\nProperties: #{properties.inspect}"
+    "#{self.class.name}: #{data}\nAttributes: #{header.inspect}\nProperties: #{properties.inspect}"
   end
+  
 end
