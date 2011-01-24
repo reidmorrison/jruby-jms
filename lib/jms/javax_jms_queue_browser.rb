@@ -14,7 +14,7 @@
 #  limitations under the License.
 ################################################################################
 
-module Java::javaxJms::QueueBrowser
+module javax.jms::QueueBrowser
   # For each message on the queue call the supplied Proc
   def each(parms={}, &proc)
     raise "javax.jms.QueueBrowser::each requires a code block to be executed for each message received" unless proc

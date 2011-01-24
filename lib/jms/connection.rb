@@ -29,7 +29,7 @@ module JMS
   #
   # For Example, to read all messages from a queue and then terminate:
   #  require 'rubygems'
-  #  require 'jms4jruby'
+  #  require 'jms'
   #
   #  JMS::Connection.create_session(
   #    :queue_manager=>'REID',   # Should be :q_mgr_name
@@ -37,7 +37,7 @@ module JMS
   #    :channel=>'MY.CLIENT.CHL',
   #    :port=>1414,
   #    :factory => com.ibm.mq.jms.MQQueueConnectionFactory,
-  #    :transport_type => Java::com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
+  #    :transport_type => com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
   #    :username => 'mqm'
   #  ) do |session|
   #    session.consumer(:q_name=>'TEST', :mode=>:input) do |consumer|
@@ -56,13 +56,51 @@ module JMS
   #
 
   class Connection
-
+    # Create a connection to the JMS provider, start the connection,
+    # call the supplied code block, then close the connection upon completion
+    # 
+    # Returns the result of the supplied block
+    def self.start(parms = {}, &proc)
+      raise "Missing mandatory Block when calling JMS::Connection.start" unless proc
+      connection = Connection.new(parms)
+      connection.start
+      begin
+        proc.call(connection)
+      ensure
+        connection.close
+      end
+    end
+    
+    # Connect to a JMS Broker, create a session and call the code block passing in the session
+    # Both the Session and Connection are closed on termination of the block
+    # 
+    # Shortcut convenience method to both connect to the broker and create a session
+    # Useful when only a single session is required in the current thread
+    # 
+    # Note: It is important that each thread have its own session to support transactions
+    def self.session(parms = {}, &proc)
+      self.start(parms) do |connection|
+        connection.session(parms, &proc)
+      end
+    end
+    
+    # Replace the default logger
+    # 
+    # The supplied logger must respond to the following methods
+    # TODO Add method list  ...
+    def self.log=(logger)
+      @@log = logger
+    end
+    
     # Class level logger
     def self.log
-      @@log ||= Java::org.apache.commons.logging.LogFactory.getLog('jms4r.Connection')
+      @@log ||= org.apache.commons.logging.LogFactory.getLog('JMS.Connection')
     end
 
-    # Creates and starts a connection to the JMS provider
+    # Create a connection to the JMS provider
+    # 
+    # Note: Connection::start must be called before any consumers will be
+    #       able to receive messages
     #
     # In JMS we need to start by obtaining the JMS Factory class that is supplied
     # by the JMS Vendor.
@@ -78,12 +116,6 @@ module JMS
     #   :jndi_name    => String: Name of JNDI entry at which the Factory can be found
     #   :jndi_context => Mandatory if jndi lookup is being used, contains details
     #                    on how to connect to JNDI server etc.
-    #
-    #   :connection_start => :manual forces the connection to not start receiving
-    #                                messages until the connection has been manually
-    #                                started using Connection::start
-    #                        By default the connection is started automatically once
-    #                        the connection has been established
     #
     # :factory and :jndi_name are mutually exclusive, both cannot be supplied at the
     # same time. :factory takes precedence over :jndi_name
@@ -128,7 +160,7 @@ module JMS
     #    :host_name=>'localhost',
     #    :channel=>'MY.CLIENT.CHL',
     #    :port=>1414,
-    #    :transport_type => Java::com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
+    #    :transport_type => com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
     #    :username => 'mqm'
     #
     #   For: Active MQ
@@ -163,7 +195,7 @@ module JMS
     #      'connectionfactory.local' => "amqp://guest:guest@clientid/testpath?brokerlist='tcp://localhost:5672'"
     #    }
     #
-    def connect(params = {})
+    def initialize(params = {})
       # Used by ::on_message
       @sessions = []
       @consumers = []
@@ -199,7 +231,6 @@ module JMS
       else
         @jms_connection = connection_factory.create_connection
       end
-      @jms_connection.start unless params[:connection_start] == :manual
     end
 
     # Start delivery of messages over this connection.
@@ -218,27 +249,6 @@ module JMS
       @jms_connection.stop
     end
 
-    # Create a connection to the JMS provider, calls the supplied code block,
-    # then closes the connection once the code block completes.
-    # If no block is passed in then a new connection will be returned and it
-    # is the responsibility of the caller to call Connection::disconnect
-    # Returns the result of the Proc, or if no Proc is supplied, then the Connection
-    # created is returned
-    def self.connect(parms = {}, &proc)
-      connection = Connection.new
-      connection.connect parms
-      result = connection
-      if proc
-        begin
-          result = proc.call(connection)
-        ensure
-          connection.disconnect
-        end
-        connection = nil
-      end
-      result
-    end
-
     # Create a session over this connection.
     # It is recommended to create separate sessions for each thread
     # If a block of code is passed in, it will be called and then the session is automatically
@@ -252,34 +262,40 @@ module JMS
     #  :options => any of the javax.jms.Session constants
     #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
+    def session(parms={}, &proc)
+      raise "Missing mandatory Block when calling JMS::Connection#session" unless proc
+      session = self.create_session(parms)
+      begin
+        proc.call(session)
+      ensure
+        session.close
+      end
+    end
+
+    # Create a session over this connection.
+    # It is recommended to create separate sessions for each thread
+    # 
+    # Note: Remember to call close on the returned session when it is no longer
+    #       needed. Rather use JMS::Connection#session with a block whenever
+    #       possible
+    #
+    # Parameters:
+    #  :transacted => true or false
+    #      Determines whether transactions are supported within this session.
+    #      I.e. Whether commit or rollback can be called
+    #      Default: false
+    #  :options => any of the javax.jms.Session constants
+    #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #
     def create_session(parms={}, &proc)
       transacted = parms[:transacted] || false
-      options = parms[:options] || Java::javax.jms.Session::AUTO_ACKNOWLEDGE
-      session = @jms_connection.create_session(transacted, options)
-      if proc
-        begin
-          proc.call(session)
-        ensure
-          session.close
-          session = nil
-        end
-      end
-      session
+      options = parms[:options] || javax.jms.Session::AUTO_ACKNOWLEDGE
+      @jms_connection.create_session(transacted, options)
     end
 
-    # Connect to a JMS Broker, create a session and call the code block passing in the session
-    # Shortcut convenience method to both connect to the broker and create a session
-    # Useful when only a single session is required.
-    # Note: It is important that each thread have its own session to support transactions
-    def self.create_session(parms = {}, &proc)
-      self.connect(parms) do |connection|
-        connection.create_session(parms, &proc)
-      end
-    end
-
-    # Disconnect from the JMS Provider
+    # Close connection with the JMS Provider
     # First close any consumers or sessions that are active as a result of JMS::Connection::on_message
-    def disconnect
+    def close
       @consumers.each {|consumer| consumer.close } if @consumers
       @consumers = []
 
@@ -328,13 +344,14 @@ module JMS
     #                  Symbol: :temporary => Create temporary topic
     #                  Mandatory unless :q_name is supplied
     #     Or,
-    #   :destination=> Explicit Java::javaxJms::Destination to use
+    #   :destination=> Explicit javaxJms::Destination to use
     #
     #   :selector   => Filter which messages should be returned from the queue
     #                  Default: All messages
     #   :no_local   => Determine whether messages published by its own connection
     #                  should be delivered to it
     #                  Default: false
+    #                  
     #   :statistics Capture statistics on how many messages have been read
     #      true  : This method will capture statistics on the number of messages received
     #              and the time it took to process them.
@@ -385,7 +402,7 @@ module JMS
   # For internal use only
   private
   class MessageListener
-    include Java::javax.jms.MessageListener
+    include javax.jms::MessageListener
 
     # Parameters:
     #   :statistics Capture statistics on how many messages have been read
@@ -451,7 +468,7 @@ module JMS
 
     # Creates a connection per standard JMS 1.1 techniques from the Oracle AQ JMS Interface
     def create_connection
-      cf = Java::oracle.jms.AQjmsFactory.getConnectionFactory(@url, Java::java.util.Properties.new)
+      cf = oracle.jms.AQjmsFactory.getConnectionFactory(@url, java.util.Properties.new)
       if username
         cf.createConnection(@username, @password)
       else

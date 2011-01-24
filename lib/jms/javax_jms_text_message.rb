@@ -15,7 +15,7 @@
 ################################################################################
 
 #Interface javax.jms.TextMessage
-module Java::javaxJms::TextMessage
+module javax.jms::TextMessage
   def data
     getText
   end

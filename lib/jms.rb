@@ -14,6 +14,7 @@
 #  limitations under the License.
 ################################################################################
 
+require 'java'
 require 'jms/connection'
 require 'jms/javax_jms_message'
 require 'jms/javax_jms_text_message'

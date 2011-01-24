@@ -9,7 +9,7 @@ $LOAD_PATH.unshift File.dirname(__FILE__) + '/../../lib'
 require 'rubygems'
 require 'jms'
 
-JMS::Connection.create_session({
+JMS::Connection.session({
     :jndi_name => '/ConnectionFactory',
     :jndi_context => {
       'java.naming.factory.initial' => 'org.jnp.interfaces.NamingContextFactory',

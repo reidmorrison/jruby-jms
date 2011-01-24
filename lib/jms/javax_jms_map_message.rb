@@ -15,7 +15,7 @@
 ################################################################################
 
 #Interface javax.jms.MapMessage
-module Java::javaxJms::MapMessage
+module javax.jms::MapMessage
   # Since each is defined, add support for: inject, map, include?, and find_all?
   # <=> also allows support for:  min, max, and sort
   include Enumerable

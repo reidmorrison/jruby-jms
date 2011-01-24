@@ -14,7 +14,7 @@
 #  limitations under the License.
 ################################################################################
 
-module Java::javaxJms::MessageConsumer
+module javax.jms::MessageConsumer
   # Obtain a message from the Destination or Topic
   # In JMS terms, the message is received from the Destination
   # :timeout follows the rules for MQSeries:

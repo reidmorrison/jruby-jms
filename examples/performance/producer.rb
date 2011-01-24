@@ -10,7 +10,7 @@ require 'rubygems'
 require 'jms'
 count = (ARGV[0] || 1).to_i
  
-JMS::Connection.create_session(
+JMS::Connection.session(
   :jndi_name => '/ConnectionFactory',
   :jndi_context => {
     'java.naming.factory.initial' => 'org.jnp.interfaces.NamingContextFactory',

@@ -19,7 +19,7 @@
 # JMS Provider.
 # 
 # Interface javax.jms.Session
-module Java::javaxJms::Session
+module javax.jms::Session
   # Create a new message instance based on the type of the data being supplied
   #   String (:to_str)    => TextMessage
   #   Hash   (:each_pair) => MapMessage
@@ -43,7 +43,7 @@ module Java::javaxJms::Session
   # Does the session support transactions?
   # I.e. Can/should commit and rollback be called
   def transacted?
-    self.getAcknowledgeMode == Java::javax.jms.Session::SESSION_TRANSACTED
+    self.getAcknowledgeMode == javax.jms.Session::SESSION_TRANSACTED
   end
 
   # Create and open a queue to put or get from. Once the supplied Proc is complete
@@ -92,9 +92,11 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary topic
   #                  Mandatory unless :q_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javax.jms::Destination to use
   def producer(parms, &proc)
     destination = create_destination(parms)
+    # Call original java method with this destination
+    #p = java_send :create_producer, [javax.jms::Destination], destination
     p = create_producer(destination)
     if proc
       begin
@@ -121,7 +123,7 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary topic
   #                  Mandatory unless :q_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javaxJms::Destination to use
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
@@ -162,7 +164,7 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary topic
   #                  Mandatory unless :q_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javaxJms::Destination to use
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
@@ -198,7 +200,7 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javaxJms::Destination to use
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
@@ -231,7 +233,7 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javaxJms::Destination to use
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
@@ -251,9 +253,9 @@ module Java::javaxJms::Session
   #                  Symbol: :temporary => Create temporary topic
   #                  Mandatory unless :q_name is supplied
   #     Or,
-  #   :destination=> Explicit Java::javaxJms::Destination to use
+  #   :destination=> Explicit javaxJms::Destination to use
   def create_destination(parms)
-    return parms[:destination] if parms[:destination] && parms[:destination].kind_of?(Java::javaxJms::Destination)
+    return parms[:destination] if parms[:destination] && parms[:destination].kind_of?(javaxJms::Destination)
     q_name = parms[:q_name]
     topic_name = parms[:topic_name]
     raise "Missing mandatory parameter :q_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless q_name || topic_name
@@ -267,8 +269,8 @@ module Java::javaxJms::Session
 end
 
 # Workaround for IBM MQ JMS implementation that implements an undocumented consume method
-if defined? Java::ComIbmMqJms::MQSession
-  class Java::ComIbmMqJms::MQSession
+if defined? com.ibm.mq.jms::MQSession
+  class com.ibm.mq.jms::MQSession
     def consume(parms, &proc)
       result = nil
       c = self.consumer(parms)

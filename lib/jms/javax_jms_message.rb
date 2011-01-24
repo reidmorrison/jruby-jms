@@ -32,7 +32,7 @@
 #   http://download.oracle.com/javaee/6/api/index.html?javax/jms/Message.html
 #
 # Interface javax.jms.Message
-module Java::javaxJms::Message
+module javax.jms::Message
 
   # Methods directly exposed from the Java class:
   
@@ -59,12 +59,12 @@ module Java::javaxJms::Message
   # Return the JMS Delivery Mode as a symbol
   #   :peristent
   #   :non_peristent
-  #   other: Value from Java::javax.jms.DeliveryMode
+  #   other: Value from javax.jms.DeliveryMode
   def jms_delivery_mode
     case getJMSDeliveryMode
-    when Java::javax.jms.DeliveryMode::PERSISTENT
+    when javax.jms.DeliveryMode::PERSISTENT
       :peristent
-    when Java::javax.jms.DeliveryMode::NON_PERSISTENT
+    when javax.jms.DeliveryMode::NON_PERSISTENT
       :non_peristent
     else
       getJMSDeliveryMode
@@ -75,13 +75,13 @@ module Java::javaxJms::Message
   # Valid values for mode
   #   :peristent
   #   :non_peristent
-  #   other: Any constant from Java::javax.jms.DeliveryMode
+  #   other: Any constant from javax.jms.DeliveryMode
   def jms_delivery_mode=(mode)
     val = case mode
     when :peristent
-      Java::javax.jms.DeliveryMode::PERSISTENT
+      javax.jms.DeliveryMode::PERSISTENT
     when :non_peristent
-      Java::javax.jms.DeliveryMode::NON_PERSISTENT
+      javax.jms.DeliveryMode::NON_PERSISTENT
     else
       mode
     end
@@ -90,18 +90,20 @@ module Java::javaxJms::Message
   
   # Is the message persistent?
   def persistent?
-    jms_delivery_mode == :persistent
+    getJMSDeliveryMode == javax.jms.DeliveryMode::PERSISTENT
   end
   
   # Returns the Message correlation ID as a String
+  # The resulting string may contain nulls
   def jms_correlation_id
-    getJMSCorrelationID
+    String.from_java_bytes(getJMSCorrelationIDAsBytes) if getJMSCorrelationIDAsBytes
   end
   
   # Set the Message correlation ID
   #   correlation_id: String
+  # Also supports embedded nulls within the correlation id
   def jms_correlation_id=(correlation_id)
-    setJMSCorrelationID(correlation_id)
+    setJMSCorrelationIDAsBytes(correlation_id.nil? ? nil : correlation_id.to_java_bytes)
   end
   
   # Returns the Message Destination
@@ -128,36 +130,38 @@ module Java::javaxJms::Message
   end
   
   # Returns the Message ID as a String
+  # The resulting string may contain embedded nulls
   def jms_message_id
     getJMSMessageID
   end
   
   # Set the Message correlation ID
-  #   correlation_id: String
+  #   message_id: String
+  # Also supports nulls within the message id
   def jms_message_id=(message_id)
     setJMSMessageID(message_id)
   end
   
-  # Returns the Message Priority as an Integer
+  # Returns the Message Priority level as an Integer
   def jms_priority
     getJMSPriority
   end
   
-  # Set the Message priority
+  # Set the Message priority level
   #   priority: Integer
   def jms_priority=(priority)
     setJMSPriority(priority)
   end
   
-  # Was the Message redelivered
+  # Indicates whether the Message was redelivered?
   def jms_redelivered?
     getJMSRedelivered
   end
   
-  # Set the Message priority
-  #   priority: Integer
-  def jms_redelivered=(priority)
-    setJMSPriority(priority)
+  # Set whether the Message was redelivered
+  #   bool: Boolean
+  def jms_redelivered=(bool)
+    setJMSPriority(bool)
   end
   
   # Returns the Message reply to Destination
@@ -185,12 +189,12 @@ module Java::javaxJms::Message
     setJMSTimestamp(timestamp)
   end
   
-  # Returns the Message type as a String
+  # Returns the Message type supplied by the client when the message was sent
   def jms_type
     getJMSType
   end
   
-  # Set the Message type
+  # Sets the Message type
   #   type: String
   def jms_type=(type)
     setJMSType(type)
@@ -205,7 +209,7 @@ module Java::javaxJms::Message
       :jms_expiration => jms_expiration,
       :jms_message_id => jms_message_id,
       :jms_priority => jms_priority,
-      :jms_redelivered => jms_redelivered,
+      :jms_redelivered => jms_redelivered?,
       :jms_reply_to => jms_reply_to,
       :jms_timestamp => jms_timestamp,
       :jms_type => jms_type,
@@ -254,7 +258,7 @@ module Java::javaxJms::Message
   end
 
   def inspect
-    "#{self.class.name}: #{data}\nAttributes: #{header.inspect}\nProperties: #{properties.inspect}"
+    "#{self.class.name}: #{data}\nAttributes: #{attributes.inspect}\nProperties: #{properties.inspect}"
   end
   
 end
