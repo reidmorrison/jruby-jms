@@ -3,16 +3,24 @@ jruby-jms
 
 * http://github.com/reidmorrison/jruby-jms
 
-### Backward Compatibility
+### Current Activities & Backward Compatibility
 
-Before I move this code to V1, I need to refactor the way that message
-properties and attributes are exposed. As a result message properties and
-the attribute API will change
+Currently reviewing Logging which uses Apache Commons logging by default.
+For now add the following Apache Commons and log4j libraries to your classpath
+* commons-logging-1.1.1.jar
+* log4j-1.2.16.jar
+
+There may still be some changes to the API to make things better and/or simpler.
 
 Once the code goes to V1.0.0 I will make every effort to not break the 
 existing interface in any way.
 
 Feedback is welcome and appreciated :)
+* Need input on Logging and any other tips and tricks on extending Interfaces
+** For example, currently cannot override Interface methods with JRuby versions
+   (See Session::create_session, which is Session::session at this time)
+* Looking for ideas on the best way to specify jar files so that they can be
+  'required' by jruby-jms rather than having to use the classpath
 
 ### Introduction
 
@@ -89,13 +97,63 @@ Instead of sending messages to a single queue, a topic can be used to publish
 messages and allow multiple consumers to register for messages that match the
 topic they are interested in
 
+### Producer
+
+Producers write message to a queue or topic
+
+ActiveMQ Example:
+  require 'rubygems'
+
+  # Include Active MQ Jar files (Not required if already in classpath)
+  require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
+
+  # Include Apache Commons Logging Jar file (For now, if not already in classpath)
+  require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
+  require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
+
+  # Include JMS after ActiveMQ
+  require 'jms'
+
+  # Connect to ActiveMQ
+  config = {
+    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+    :broker_url => 'tcp://localhost:61616'
+  }
+
+  JMS::Connection.session(config) do |session|
+    session.producer(:q_name => 'ExampleQueue') do |producer|
+      producer.send(session.message("Hello World"))
+    end
+  end
+
 ### Consumer
 
 Consumers read message from a queue or topic
 
-### Producer
+Example:
+  require 'rubygems'
 
-Producers write message to a queue or topic
+  # Include Active MQ Jar files (Not required if already in classpath)
+  require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
+
+  # Include Apache Commons Logging Jar file (For now, if not already in classpath)
+  require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
+  require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
+
+  # Include JMS after ActiveMQ
+  require 'jms'
+
+  # Connect to ActiveMQ
+  config = {
+    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+    :broker_url => 'tcp://localhost:61616'
+  }
+
+  JMS::Connection.session(config) do |session|
+    session.consume(:q_name => 'ExampleQueue', :timeout=>1000) do |message|
+      p message
+    end
+  end
 
 Overview
 --------

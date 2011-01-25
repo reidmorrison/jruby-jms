@@ -87,7 +87,7 @@ module JMS
     # Replace the default logger
     # 
     # The supplied logger must respond to the following methods
-    # TODO Add method list  ...
+    # TODO Add required methods list  ...
     def self.log=(logger)
       @@log = logger
     end

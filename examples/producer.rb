@@ -7,9 +7,10 @@
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'rubygems'
+require 'yaml'
 require 'jms'
 
-jms_provider = ARGV[0] || 'default'
+jms_provider = ARGV[0] || 'activemq'
 
 # Load Connection parameters from configuration file
 config = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))[jms_provider]

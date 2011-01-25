@@ -8,7 +8,7 @@ desc "Build gem"
 task :gem  do |t|
   gemspec = Gem::Specification.new do |s|
     s.name = 'jruby-jms'
-    s.version = '0.8.0'
+    s.version = '0.9.0'
     s.author = 'Reid Morrison'
     s.email = 'rubywmq@gmail.com'
     s.homepage = 'http://www.reidmorrison.com/'

@@ -10,7 +10,7 @@ require 'rubygems'
 require 'jms'
 require 'yaml'
 
-jms_provider = ARGV[0] || 'default'
+jms_provider = ARGV[0] || 'activemq'
 
 # Load Connection parameters from configuration file
 config = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))[jms_provider]

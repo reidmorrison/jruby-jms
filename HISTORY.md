@@ -1,4 +1,7 @@
+## 0.9.0 (2011-01-23)
 
+* Revised API with cleaner interface
+* Publish GEM
 
 ## 0.8.0 (2011-01-22)
 
