@@ -7,6 +7,7 @@ jruby-jms
 
 Currently reviewing Logging which uses Apache Commons logging by default.
 For now add the following Apache Commons and log4j libraries to your classpath
+
 * commons-logging-1.1.1.jar
 * log4j-1.2.16.jar
 
@@ -19,6 +20,7 @@ Once the code goes to V1.0.0 I will make every effort to not break the
 existing interface in any way.
 
 Feedback is welcome and appreciated :)
+
 * Need input on Logging and any other tips and tricks on extending Interfaces
 ** For example, currently cannot override Interface methods with JRuby versions
    (See Session::create_session, which is Session::session at this time)
