@@ -19,7 +19,7 @@ There may still be some changes to the API to make things better and/or simpler.
 Once the code goes to V1.0.0 I will make every effort to not break the 
 existing interface in any way.
 
-Feedback is welcome and appreciated :)
+### Feedback is welcome and appreciated :)
 
 * Need input on Logging and any other tips and tricks on extending Interfaces
 ** For example, currently cannot override Interface methods with JRuby versions
@@ -49,7 +49,7 @@ API is available to you at any time.
 
 ### Install
 
-  gem install jruby-jms
+    gem install jruby-jms
 
 ### Simplification
 
@@ -108,58 +108,58 @@ topic they are interested in
 Producers write message to a queue or topic
 
 ActiveMQ Example:
-  require 'rubygems'
-
-  # Include Active MQ Jar files (Not required if already in classpath)
-  require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
-
-  # Include Apache Commons Logging Jar file (For now, if not already in classpath)
-  require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
-  require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
-
-  # Include JMS after ActiveMQ
-  require 'jms'
-
-  # Connect to ActiveMQ
-  config = {
-    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-    :broker_url => 'tcp://localhost:61616'
-  }
-
-  JMS::Connection.session(config) do |session|
-    session.producer(:q_name => 'ExampleQueue') do |producer|
-      producer.send(session.message("Hello World"))
+    require 'rubygems'
+    
+    # Include Active MQ Jar files (Not required if already in classpath)
+    require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
+    
+    # Include Apache Commons Logging Jar file (For now, if not already in classpath)
+    require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
+    require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
+    
+    # Include JMS after ActiveMQ
+    require 'jms'
+    
+    # Connect to ActiveMQ
+    config = {
+      :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+      :broker_url => 'tcp://localhost:61616'
+    }
+    
+    JMS::Connection.session(config) do |session|
+      session.producer(:q_name => 'ExampleQueue') do |producer|
+        producer.send(session.message("Hello World"))
+      end
     end
-  end
 
 ### Consumer
 
 Consumers read message from a queue or topic
 
-Example:
-  require 'rubygems'
-
-  # Include Active MQ Jar files (Not required if already in classpath)
-  require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
-
-  # Include Apache Commons Logging Jar file (For now, if not already in classpath)
-  require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
-  require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
-
-  # Include JMS after ActiveMQ
-  require 'jms'
-
-  # Connect to ActiveMQ
-  config = {
-    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-    :broker_url => 'tcp://localhost:61616'
-  }
-
-  JMS::Connection.session(config) do |session|
-    session.consume(:q_name => 'ExampleQueue', :timeout=>1000) do |message|
-      p message
+ActiveMQ Example:
+    require 'rubygems'
+    
+    # Include Active MQ Jar files (Not required if already in classpath)
+    require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
+    
+    # Include Apache Commons Logging Jar file (For now, if not already in classpath)
+    require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
+    require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
+    
+    # Include JMS after ActiveMQ
+    require 'jms'
+    
+    # Connect to ActiveMQ
+    config = {
+      :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+      :broker_url => 'tcp://localhost:61616'
+    }
+    
+    JMS::Connection.session(config) do |session|
+      session.consume(:q_name => 'ExampleQueue', :timeout=>1000) do |message|
+        p message
+      end
     end
-  end
 
 Overview
 --------
@@ -223,7 +223,7 @@ Contributing
 
 Once you've made your great commits:
 
-1. [Fork][1] Resque
+1. [Fork][1] jruby-jms
 2. Create a topic branch - `git checkout -b my_branch`
 3. Push to your branch - `git push origin my_branch`
 4. Create an [Issue][2] with a link to your branch
