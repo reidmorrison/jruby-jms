@@ -10,6 +10,9 @@ For now add the following Apache Commons and log4j libraries to your classpath
 * commons-logging-1.1.1.jar
 * log4j-1.2.16.jar
 
+Please read the source files for now for documentation. Looking into rdoc doc
+generation issue.
+
 There may still be some changes to the API to make things better and/or simpler.
 
 Once the code goes to V1.0.0 I will make every effort to not break the 
@@ -21,6 +24,7 @@ Feedback is welcome and appreciated :)
    (See Session::create_session, which is Session::session at this time)
 * Looking for ideas on the best way to specify jar files so that they can be
   'required' by jruby-jms rather than having to use the classpath
+* Need to get rdoc working for 
 
 ### Introduction
 

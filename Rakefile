@@ -11,7 +11,7 @@ task :gem  do |t|
     s.version = '0.9.0'
     s.author = 'Reid Morrison'
     s.email = 'rubywmq@gmail.com'
-    s.homepage = 'http://www.reidmorrison.com/'
+    s.homepage = 'https://github.com/reidmorrison/jruby-jms'
     s.date = Date.today.to_s
     s.description = 'JRuby-JMS is a Java and Ruby library that exposes the Java JMS API in a ruby friendly way. For JRuby only.'
     s.summary = 'JRuby interface into JMS'
