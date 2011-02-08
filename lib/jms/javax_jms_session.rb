@@ -78,6 +78,44 @@ module javax.jms::Session
     q
   end
 
+  def temporary_queue(&proc)
+    q = create_temporary_queue
+    if proc
+      begin
+        proc.call(q)
+      ensure
+        q = nil
+      end
+    end
+    q
+  end
+
+  def topic(topic_name, &proc)
+    t = create_topic(topic_name)
+    if proc
+      begin
+        proc.call(q)
+      ensure
+        q = nil
+      end
+    end
+    t
+  end
+
+  def temporary_topic(&proc)
+    t = create_temporary_topic
+    if proc
+      begin
+        proc.call(q)
+      ensure
+        q = nil
+      end
+    end
+    t
+  end
+
+
+
   # Return a producer for the queue name supplied
   # A producer supports sending messages to a Queue or a Topic
   #
