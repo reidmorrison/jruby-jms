@@ -15,11 +15,5 @@
 ################################################################################
 
 require 'java'
+require 'jms/logging'
 require 'jms/connection'
-require 'jms/javax_jms_message'
-require 'jms/javax_jms_text_message'
-require 'jms/javax_jms_map_message'
-require 'jms/javax_jms_object_message'
-require 'jms/javax_jms_session'
-require 'jms/javax_jms_message_consumer'
-require 'jms/javax_jms_queue_browser'

@@ -40,18 +40,12 @@ module javax.jms::Session
     jms_message
   end
 
-  # Does the session support transactions?
-  # I.e. Can/should commit and rollback be called
-  def transacted?
-    self.getAcknowledgeMode == javax.jms.Session::SESSION_TRANSACTED
-  end
-
-  # Create and open a queue to put or get from. Once the supplied Proc is complete
+  # Create and open a queue or topic to put or get from. Once the supplied Proc is complete
   # the queue is automatically closed. If no Proc is supplied then the queue must
   # be explicitly closed by the caller.
   def destination(parms={}, &proc)
     parms[:jms_session] = self
-    q = JMS::Destination.new(parms)
+    q = create_destination(parms)
     q.open(parms)
     if proc
       begin
@@ -245,7 +239,7 @@ module javax.jms::Session
   # Create the destination based on the parameter supplied
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
@@ -256,12 +250,12 @@ module javax.jms::Session
   #   :destination=> Explicit javaxJms::Destination to use
   def create_destination(parms)
     return parms[:destination] if parms[:destination] && parms[:destination].kind_of?(javaxJms::Destination)
-    q_name = parms[:q_name]
+    queue_name = parms[:queue_name] || parms[:q_name]
     topic_name = parms[:topic_name]
-    raise "Missing mandatory parameter :q_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless q_name || topic_name
+    raise "Missing mandatory parameter :q_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
 
-    if q_name
-      q_name == :temporary ? create_temporary_queue : create_queue(q_name)
+    if queue_name
+      queue_name == :temporary ? create_temporary_queue : create_queue(queue_name)
     else
       topic_name == :temporary ? create_temporary_topic : create_topic(topic_name)
     end

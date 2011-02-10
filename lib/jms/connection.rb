@@ -58,7 +58,7 @@ module JMS
   class Connection
     # Create a connection to the JMS provider, start the connection,
     # call the supplied code block, then close the connection upon completion
-    # 
+    #
     # Returns the result of the supplied block
     def self.start(parms = {}, &proc)
       raise "Missing mandatory Block when calling JMS::Connection.start" unless proc
@@ -70,35 +70,57 @@ module JMS
         connection.close
       end
     end
-    
+
     # Connect to a JMS Broker, create a session and call the code block passing in the session
     # Both the Session and Connection are closed on termination of the block
-    # 
+    #
     # Shortcut convenience method to both connect to the broker and create a session
     # Useful when only a single session is required in the current thread
-    # 
+    #
     # Note: It is important that each thread have its own session to support transactions
     def self.session(parms = {}, &proc)
       self.start(parms) do |connection|
         connection.session(parms, &proc)
       end
     end
-    
-    # Replace the default logger
-    # 
-    # The supplied logger must respond to the following methods
-    # TODO Add required methods list  ...
-    def self.log=(logger)
-      @@log = logger
-    end
-    
-    # Class level logger
-    def self.log
-      @@log ||= org.apache.commons.logging.LogFactory.getLog('JMS.Connection')
+
+    # Load the required jar files for this JMS Provider and
+    # load JRuby extensions for those classes
+    #
+    # Rather than copying the JMS jar files into the JRuby lib, load them
+    # on demand. JRuby JMS extensions are only loaded once the jar files have been
+    # loaded.
+    #
+    # Can be called multiple times if required, although it would not be performant
+    # to do so regularly.
+    #
+    # Parameter: jar_list is an Array of the path and filenames to jar files
+    #                     to load for this JMS Provider
+    #
+    # Returns nil
+    #
+    # TODO make this a class method
+    def fetch_dependencies(jar_list)
+      jar_list.each do |jar|
+        JMS::logger.info "Loading Jar File:#{jar}"
+        begin
+          require jar
+        rescue Exception => exc
+          JMS::logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
+        end
+      end
+      require 'jms/message_listener'
+      require 'jms/javax_jms_message'
+      require 'jms/javax_jms_text_message'
+      require 'jms/javax_jms_map_message'
+      require 'jms/javax_jms_object_message'
+      require 'jms/javax_jms_session'
+      require 'jms/javax_jms_message_consumer'
+      require 'jms/javax_jms_queue_browser'
     end
 
     # Create a connection to the JMS provider
-    # 
+    #
     # Note: Connection::start must be called before any consumers will be
     #       able to receive messages
     #
@@ -166,7 +188,7 @@ module JMS
     #   For: Active MQ
     #    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
     #    :broker_url => 'tcp://localhost:61616'
-    #    
+    #
     #   ActiveMQ requires the following jar files on your CLASSPATH
     #
     #   For Oracle AQ 9 Server
@@ -200,6 +222,10 @@ module JMS
       @sessions = []
       @consumers = []
 
+      # Load Jar files on demand so that they do not need to be in the CLASSPATH
+      # of JRuby lib directory
+      fetch_dependencies(params[:require_jars]) if params[:require_jars]
+
       connection_factory = nil
       factory = params[:factory]
       if factory
@@ -218,12 +244,12 @@ module JMS
         raise "Missing mandatory parameter :factory or :jndi_name missing in call to Connection::connect"
       end
 
-      Connection.log.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
+      JMS::logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
       params.each_pair do |key, val|
         method = key.to_s+'='
         if connection_factory.respond_to? method
           connection_factory.send method, val
-          Connection.log.debug "   #{key} = #{connection_factory.send key}" if connection_factory.respond_to? key.to_sym
+          JMS::logger.debug "   #{key} = #{connection_factory.send key}" if connection_factory.respond_to? key.to_sym
         end
       end
       if params[:username]
@@ -274,7 +300,7 @@ module JMS
 
     # Create a session over this connection.
     # It is recommended to create separate sessions for each thread
-    # 
+    #
     # Note: Remember to call close on the returned session when it is no longer
     #       needed. Rather use JMS::Connection#session with a block whenever
     #       possible
@@ -284,10 +310,26 @@ module JMS
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
-    #  :options => any of the javax.jms.Session constants
-    #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #      Note: :options below is ignored if this value is set to :true
+    #  :options => any of the javax.jms.Session constants:
+    #     Note: :options is ignored of :transacted => true
+    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #        With this acknowledgment mode, the session automatically acknowledges
+    #        a client's receipt of a message either when the session has successfully
+    #        returned from a call to receive or when the message listener the session has
+    #        called to process the message successfully returns.
+    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #        With this acknowledgment mode, the client acknowledges a consumed
+    #        message by calling the message's acknowledge method.
+    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #        This acknowledgment mode instructs the session to lazily acknowledge
+    #        the delivery of messages.
+    #     javax.jms.Session::SESSION_TRANSACTED
+    #        This value is returned from the method getAcknowledgeMode if the
+    #        session is transacted.
+    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
-    def create_session(parms={}, &proc)
+    def create_session(parms={})
       transacted = parms[:transacted] || false
       options = parms[:options] || javax.jms.Session::AUTO_ACKNOWLEDGE
       @jms_connection.create_session(transacted, options)
@@ -351,7 +393,7 @@ module JMS
     #   :no_local   => Determine whether messages published by its own connection
     #                  should be delivered to it
     #                  Default: false
-    #                  
+    #
     #   :statistics Capture statistics on how many messages have been read
     #      true  : This method will capture statistics on the number of messages received
     #              and the time it took to process them.
@@ -397,68 +439,6 @@ module JMS
       @consumers.collect{|consumer| consumer.on_message_statistics}
     end
 
-  end
-
-  # For internal use only
-  private
-  class MessageListener
-    include javax.jms::MessageListener
-
-    # Parameters:
-    #   :statistics Capture statistics on how many messages have been read
-    #      true  : This method will capture statistics on the number of messages received
-    #              and the time it took to process them.
-    #              The timer starts when the listener instance is created and finishes when either the last message was received,
-    #              or when Destination::statistics is called. In this case MessageConsumer::statistics
-    #              can be called several times during processing without affecting the end time.
-    #              Also, the start time and message count is not reset until MessageConsumer::each
-    #              is called again with :statistics => true
-    #
-    #              The statistics gathered are returned when :statistics => true and :async => false
-    def initialize(parms={}, &proc)
-      @proc = proc
-      @log = org.apache.commons.logging.LogFactory.getLog('JMS.MessageListener')
-
-      if parms[:statistics]
-        @message_count = 0
-        @start_time = Time.now
-      end
-    end
-
-    # Method called for every message received on the queue
-    # Per the JMS specification, this method will be called sequentially for each message on the queue.
-    # This method will not be called again until its prior invocation has completed.
-    # Must be onMessage() since on_message() does not work for interface methods that must be implemented
-    def onMessage(message)
-      begin
-        if @message_count
-          @message_count += 1
-          @last_time = Time.now
-        end
-        @proc.call message
-      rescue SyntaxError, NameError => boom
-        @log.error "Unhandled Exception processing JMS Message. Doesn't compile: " + boom
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error boom.backtrace.join("\n")
-      rescue StandardError => bang
-        @log.error "Unhandled Exception processing JMS Message. Doesn't compile: " + bang
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error boom.backtrace.join("\n")
-      rescue => exc
-        @log.error "Unhandled Exception processing JMS Message. Exception occurred:\n#{exc}"
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error exc.backtrace.join("\n")
-      end
-    end
-
-    # Return Statistics gathered for this listener
-    def statistics
-      raise "First call MessageConsumer::on_message with :statistics=>true before calling MessageConsumer::statistics()" unless @message_count
-      duration =(@last_time || Time.now) - @start_time
-      {:messages => @message_count,
-        :duration => duration,
-        :messages_per_second => (@message_count/duration).to_i}
-    end
   end
 
   # Wrapper to support Oracle AQ
