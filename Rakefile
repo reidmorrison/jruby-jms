@@ -1,6 +1,7 @@
 raise "jruby-jms must be built with JRuby: try again with `jruby -S rake'" unless defined?(JRUBY_VERSION)
 
 require 'rake/clean'
+require 'rake/testtask'
 require 'date'
 require 'java'
 
@@ -19,4 +20,14 @@ task :gem  do |t|
     s.has_rdoc = true
   end
   Gem::Builder.new(gemspec).build
+end
+
+task :test do
+
+  Rake::TestTask.new(:functional) do |t|
+    t.test_files = FileList['test/*_test.rb']
+    t.verbose    = true
+  end
+
+  Rake::Task['functional'].invoke
 end

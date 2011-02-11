@@ -5,12 +5,6 @@ jruby-jms
 
 ### Current Activities & Backward Compatibility
 
-Currently reviewing Logging which uses Apache Commons logging by default.
-For now add the following Apache Commons and log4j libraries to your classpath
-
-* commons-logging-1.1.1.jar
-* log4j-1.2.16.jar
-
 Please read the source files for now for documentation. Looking into rdoc doc
 generation issue.
 
@@ -21,12 +15,10 @@ existing interface in any way.
 
 ### Feedback is welcome and appreciated :)
 
-* Need input on Logging and any other tips and tricks on extending Interfaces
-** For example, currently cannot override Interface methods with JRuby versions
-   (See Session::create_session, which is Session::session at this time)
-* Looking for ideas on the best way to specify jar files so that they can be
-  'required' by jruby-jms rather than having to use the classpath
-* Need to get rdoc working for 
+### Todo
+
+* Need to get rdoc working
+* More tests, especially pub/sub
 
 ### Introduction
 
@@ -110,22 +102,16 @@ Producers write message to a queue or topic
 ActiveMQ Example:
     require 'rubygems'
     
-    # Include Active MQ Jar files (Not required if already in classpath)
-    require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
-    
-    # Include Apache Commons Logging Jar file (For now, if not already in classpath)
-    require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
-    require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
-    
     # Include JMS after ActiveMQ
     require 'jms'
     
     # Connect to ActiveMQ
     config = {
       :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-      :broker_url => 'tcp://localhost:61616'
+      :broker_url => 'tcp://localhost:61616',
+      :require_jars => ["~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"]
     }
-    
+
     JMS::Connection.session(config) do |session|
       session.producer(:q_name => 'ExampleQueue') do |producer|
         producer.send(session.message("Hello World"))
@@ -139,20 +125,14 @@ Consumers read message from a queue or topic
 ActiveMQ Example:
     require 'rubygems'
     
-    # Include Active MQ Jar files (Not required if already in classpath)
-    require '~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar'
-    
-    # Include Apache Commons Logging Jar file (For now, if not already in classpath)
-    require '~/Applications/apache-activemq-5.4.2/lib/commons-logging-1.1.jar'
-    require '~/Applications/apache-activemq-5.4.2/lib/optional/log4j-1.2.14.jar'
-    
     # Include JMS after ActiveMQ
     require 'jms'
     
     # Connect to ActiveMQ
     config = {
       :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-      :broker_url => 'tcp://localhost:61616'
+      :broker_url => 'tcp://localhost:61616',
+      :require_jars => ["~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"]
     }
     
     JMS::Connection.session(config) do |session|
@@ -187,15 +167,16 @@ queue or topic match will be passed to the block.
 Logging
 -------
 
-jruby-jms currently uses Apache Commons logging, but this is subject to changes
-since many users of jruby-jms will want to use the Rails logger
+jruby-jms detects the logging available in the current environment.
+When running under Rails it will use the Rails logger, otherwise the standard
+Ruby logger. The logger can also be replaced by calling Connection.logger=
 
 Dependencies
 ------------
 
 ### JRuby
 
-jruby-jms has been tested against JRuby 1.5.1, but should work with any
+jruby-jms has been tested against JRuby 1.5.1 and 1.6, but should work with any
 current JRuby version.
 
 ### JMS
@@ -263,7 +244,7 @@ Reid Morrison :: rubywmq@gmail.com :: @reidmorrison
 License
 -------
 
-Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
+Copyright 2008 - 2011  J. Reid Morrison
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

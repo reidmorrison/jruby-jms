@@ -6,11 +6,16 @@
 #    jruby producer.rb activemq
 #
 ---
+# Which JMS Provider to use by default
+default: activemq
+
 activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
     - ~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
     
 hornetq:
   # Connect to a local HornetQ Broker using JNDI
@@ -21,4 +26,13 @@ hornetq:
     java.naming.factory.url.pkgs: org.jboss.naming:org.jnp.interfaces
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
+  :require_jars:
+    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-core-client.jar
+    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-core.jar
+    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-jms-client.jar
+    - ~/Applications/hornetq-2.1.2.Final/lib/jboss-jms-api.jar
+    - ~/Applications/hornetq-2.1.2.Final/lib/jnp-client.jar
+    - ~/Applications/hornetq-2.1.2.Final/lib/netty.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
       

@@ -34,7 +34,6 @@ module JMS
     #              The statistics gathered are returned when :statistics => true and :async => false
     def initialize(parms={}, &proc)
       @proc = proc
-      @log = org.apache.commons.logging.LogFactory.getLog('JMS.MessageListener')
 
       if parms[:statistics]
         @message_count = 0
@@ -54,17 +53,17 @@ module JMS
         end
         @proc.call message
       rescue SyntaxError, NameError => boom
-        @log.error "Unhandled Exception processing JMS Message. Doesn't compile: " + boom
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error boom.backtrace.join("\n")
+        JMS::logger.error "Unhandled Exception processing JMS Message. Doesn't compile: " + boom
+        JMS::logger.error "Ignoring poison message:\n#{message.inspect}"
+        JMS::logger.error boom.backtrace.join("\n")
       rescue StandardError => bang
-        @log.error "Unhandled Exception processing JMS Message. Doesn't compile: " + bang
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error boom.backtrace.join("\n")
+        JMS::logger.error "Unhandled Exception processing JMS Message. Doesn't compile: " + bang
+        JMS::logger.error "Ignoring poison message:\n#{message.inspect}"
+        JMS::logger.error boom.backtrace.join("\n")
       rescue => exc
-        @log.error "Unhandled Exception processing JMS Message. Exception occurred:\n#{exc}"
-        @log.error "Ignoring poison message:\n#{message.inspect}"
-        @log.error exc.backtrace.join("\n")
+        JMS::logger.error "Unhandled Exception processing JMS Message. Exception occurred:\n#{exc}"
+        JMS::logger.error "Ignoring poison message:\n#{message.inspect}"
+        JMS::logger.error exc.backtrace.join("\n")
       end
     end
 

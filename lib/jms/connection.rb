@@ -52,9 +52,8 @@ module JMS
   # The above code creates a Connection and then a Session. Once the block completes
   # the session is closed and the Connection disconnected.
   #
-  # TODO: Multithreaded example:
+  # See: http://download.oracle.com/javaee/6/api/javax/jms/Connection.html
   #
-
   class Connection
     # Create a connection to the JMS provider, start the connection,
     # call the supplied code block, then close the connection upon completion
@@ -259,18 +258,18 @@ module JMS
       end
     end
 
-    # Start delivery of messages over this connection.
+    # Start (or restart) delivery of incoming messages over this connection.
     # By default no messages are delivered until this method is called explicitly
     # Delivery of messages to any asynchronous Destination::each() call will only
-    # start after Connection::start is called
-    #    Corresponds to JMS start call
+    # start after Connection::start is called, or Connection.start is used
     def start
       @jms_connection.start
     end
-
-    # Stop delivery of messages to any asynchronous Destination::each() calls
+      
+    # Temporarily stop delivery of incoming messages on this connection
     # Useful during a hot code update or other changes that need to be completed
     # without any new messages being processed
+    # Call start() to resume receiving messages
     def stop
       @jms_connection.stop
     end
@@ -346,13 +345,61 @@ module JMS
 
       @jms_connection.close if @jms_connection
     end
+    
+    # Gets the client identifier for this connection.
+    def client_id
+      @jms_connection.getClientID
+    end
+          
+    # Sets the client identifier for this connection.
+    def client_id=(client_id)
+      @jms_connection.setClientID(client_id)
+    end
+    
+    # Returns the ExceptionListener object for this connection
+    # Returned class implements interface javax.jms.ExceptionListener
+    def exception_listener
+      @jms_connection.getExceptionListener
+    end
+ 
+    # Sets an exception listener for this connection
+    # See ::on_exception to set a Ruby Listener
+    # Returns: nil
+    def exception_listener=(listener)
+      setExceptionListener(listener)
+    end
+    
+    # Whenever an exception occurs the supplied block is called
+    # This is important when Connection::on_message has been used, since
+    # failures to the connection would be lost otherwise
+    # 
+    # For details on the supplied parameter when the block is called, 
+    # see: http://download.oracle.com/javaee/6/api/javax/jms/JMSException.html
+    # 
+    # Example:
+    #   connection.on_message do |jms_exception|
+    #     puts "JMS Exception has occurred: #{jms_exception}"
+    #   end
+    #
+    # Returns: nil
+    def on_exception(&block)
+      setExceptionListener(block)
+    end
+    
+    # Gets the metadata for this connection
+    # see: http://download.oracle.com/javaee/6/api/javax/jms/ConnectionMetaData.html
+    def meta_data
+      @jms_connection.getMetaData
+    end
+    
+    # Return a string describing the JMS provider and version
+    def to_s
+      md = @jms_connection.getMetaData
+      "JMS::Connection provider: #{md.getJMSProviderName} v#{md.getProviderVersion}, JMS v#{md.getJMSVersion}"
+    end
 
     # TODO: Return a pretty print version of the current JMS Connection
     #    def to_s
-    #      "Connected to " + metaData.getJMSProviderName() +
-    #        " version " + metaData.getProviderVersion() + " (" +
-    #        metaData.getProviderMajorVersion() + "." + metaData.getProviderMinorVersion() +
-    #        ")";
     #    end
 
     # Receive messages in a separate thread when they arrive
@@ -410,6 +457,9 @@ module JMS
     #          true => The session is committed
     #          false => The session is rolled back
     #          Any Exception => The session is rolled back
+    #
+    # Note: Also supply connection::on_exception so that connection failures can be handled
+    #
     #
     def on_message(parms, &proc)
       raise "JMS::Connection must be connected prior to calling JMS::Connection::on_message" unless @sessions && @consumers

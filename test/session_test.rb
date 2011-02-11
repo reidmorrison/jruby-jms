@@ -8,53 +8,177 @@ require 'jms'
 require 'yaml'
 
 class JMSTest < Test::Unit::TestCase
-  context '' do
+  context 'JMS Session' do
     # Load configuration from jms.yml
     setup do
-      jms_provider =  'activemq'  # TODO Make Environment Variable configurable
-
+      # To change the JMS provider, edit jms.yml and change :default
+      
       # Load Connection parameters from configuration file
-      @config = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))[jms_provider]
+      cfg = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))
+      jms_provider = cfg['default']
+      @config = cfg[jms_provider]
       raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless @config
+      @queue_name = @config[:queue_name] || raise("Mandatory :queue_name missing from jms.yml")
+      @topic_name = @config[:topic_name] || raise("Mandatory :topic_name missing from jms.yml")
     end
 
-    should 'Create Connection to the Broker/Server' do
-      connection = JMS::Connection.new(@config)
-      assert_not_nil connection
-      connection.close
-    end
-
-    should 'Create and start Connection to the Broker/Server with block' do
-      JMS::Connection.start(@config) do |connection|
-        assert_not_nil connection
+    should 'create a session' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
       end
     end
-   
-    should 'Create and start Connection to the Broker/Server with block and start one session' do
+
+    should 'create automatic messages' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session 
+        assert_not_nil session
+        # Create Text Message
+        assert_equal session.message("Hello").java_kind_of?(javax.jms::TextMessage), true
+          
+        # Create Map Message
+        assert_equal session.message('hello'=>'world').java_kind_of?(javax.jms::MapMessage), true
+      end
+    end
+
+    should 'create explicit messages' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        # Create Text Message
+        assert_equal session.create_text_message("Hello").java_kind_of?(javax.jms::TextMessage), true
+          
+        # Create Map Message
+        assert_equal session.create_map_message.java_kind_of?(javax.jms::MapMessage), true
       end
     end
     
-    should 'Start and stop connection' do
-      connection = JMS::Connection.new(@config)
-      assert_not_nil connection
-      assert_nil connection.start
-      
-      assert_nil connection.stop
-      assert_nil connection.close
+    should 'create temporary destinations in blocks' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        
+        # Temporary Queue
+        session.destination(:queue_name => :temporary) do |destination|
+          assert_equal destination.java_kind_of?(javax.jms::TemporaryQueue), true
+        end
+          
+        # Temporary Topic
+        session.create_destination(:topic_name => :temporary) do |destination|
+          assert_equal destination.java_kind_of?(javax.jms::TemporaryTopic), true
+        end
+      end
+    end
+    
+    should 'create temporary destinations' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        
+        # Temporary Queue
+        destination = session.create_destination(:queue_name => :temporary)
+        assert_equal destination.java_kind_of?(javax.jms::TemporaryQueue), true
+        destination.delete
+          
+        # Temporary Topic
+        destination = session.create_destination(:topic_name => :temporary)
+        assert_equal destination.java_kind_of?(javax.jms::TemporaryTopic), true
+        destination.delete
+      end
+    end
+    
+    should 'create destinations in blocks' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        
+        # Temporary Queue
+        session.destination(:queue_name => @queue_name) do |destination|
+          assert_equal destination.java_kind_of?(javax.jms::Queue), true
+        end
+          
+        # Temporary Topic
+        session.create_destination(:topic_name => @topic_name) do |destination|
+          assert_equal destination.java_kind_of?(javax.jms::Topic), true
+        end
+      end
+    end
+    
+    should 'create destinations' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        
+        # Queue
+        queue = session.create_destination(:queue_name => @queue_name)
+        assert_equal queue.java_kind_of?(javax.jms::Queue), true
+          
+        # Topic
+        topic = session.create_destination(:topic_name => @topic_name)
+        assert_equal topic.java_kind_of?(javax.jms::Topic), true
+      end
+    end
+    
+    should 'create destinations using direct methods' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        
+        # Queue
+        queue = session.queue(@queue_name)
+        assert_equal queue.java_kind_of?(javax.jms::Queue), true
+          
+        # Temporary Queue
+        queue = session.temporary_queue
+        assert_equal queue.java_kind_of?(javax.jms::TemporaryQueue), true
+        queue.delete
+        
+        # Topic
+        topic = session.topic(@topic_name)
+        assert_equal topic.java_kind_of?(javax.jms::Topic), true
+        
+        # Temporary Topic
+        topic = session.temporary_topic
+        assert_equal topic.java_kind_of?(javax.jms::TemporaryTopic), true
+        topic.delete
+      end
+    end
+    
+    should 'produce and consume messages to/from a temporary queue' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        data = nil
+        session.producer(:queue_name => :temporary) do |producer|
+          # Send Message
+          producer.send(session.message('Hello World'))
+          
+          # Consume Message
+          session.consume(:destination => producer.destination) do |message|
+            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
+            data = message.data
+          end
+        end
+        assert_equal data, 'Hello World'
+      end
     end
 
-#    # Tests
-#    # 
-#
-#    should 'Write one message to a queue' do
-#      JMS::Connection.session(@config) do |session|
-#        session.producer(:q_name => 'ExampleQueue') do |producer|
-#          producer.send(session.message("Hello World"))
-#        end
-#      end
-#    end
+    should 'produce, browse and consume messages to/from a queue' do
+      JMS::Connection.session(@config) do |session|
+        assert_not_nil session
+        data = nil
+        browse_data = nil
+        session.producer(:queue_name => @queue_name) do |producer|
+          # Send Message
+          producer.send(session.message('Hello World'))
+          
+          # Browse Message
+          session.browse(:queue_name => @queue_name) do |message|
+            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
+            browse_data = message.data
+          end
+          
+          # Consume Message
+          session.consume(:queue_name => @queue_name) do |message|
+            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
+            data = message.data
+          end
+        end
+        assert_equal data, 'Hello World'
+        assert_equal browse_data, 'Hello World'
+      end
+    end
 
   end
 end

@@ -11,15 +11,18 @@ class JMSTest < Test::Unit::TestCase
   context 'JMS Connection' do
     # Load configuration from jms.yml
     setup do
-      jms_provider =  'activemq'  # TODO Make Environment Variable configurable
-
+      # To change the JMS provider, edit jms.yml and change :default
+      
       # Load Connection parameters from configuration file
-      @config = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))[jms_provider]
+      cfg = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))
+      jms_provider = cfg['default']
+      @config = cfg[jms_provider]
       raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless @config
     end
 
     should 'Create Connection to the Broker/Server' do
       connection = JMS::Connection.new(@config)
+      JMS::logger.info connection.to_s
       assert_not_nil connection
       connection.close
     end
@@ -32,7 +35,7 @@ class JMSTest < Test::Unit::TestCase
    
     should 'Create and start Connection to the Broker/Server with block and start one session' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session 
+        assert_not_nil session
       end
     end
     
@@ -140,7 +143,7 @@ class JMSTest < Test::Unit::TestCase
       should 'start an on_message handler' do
         JMS::Connection.start(@config) do |connection|
           value = nil
-          connection.on_message(:transacted => true, :q_name => '') do |message|
+          connection.on_message(:transacted => true, :q_name => :temporary) do |message|
             value = "received"
           end
         end
