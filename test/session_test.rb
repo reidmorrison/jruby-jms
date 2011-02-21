@@ -136,49 +136,5 @@ class JMSTest < Test::Unit::TestCase
       end
     end
     
-    should 'produce and consume messages to/from a temporary queue' do
-      JMS::Connection.session(@config) do |session|
-        assert_not_nil session
-        data = nil
-        session.producer(:queue_name => :temporary) do |producer|
-          # Send Message
-          producer.send(session.message('Hello World'))
-          
-          # Consume Message
-          session.consume(:destination => producer.destination) do |message|
-            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
-            data = message.data
-          end
-        end
-        assert_equal data, 'Hello World'
-      end
-    end
-
-    should 'produce, browse and consume messages to/from a queue' do
-      JMS::Connection.session(@config) do |session|
-        assert_not_nil session
-        data = nil
-        browse_data = nil
-        session.producer(:queue_name => @queue_name) do |producer|
-          # Send Message
-          producer.send(session.message('Hello World'))
-          
-          # Browse Message
-          session.browse(:queue_name => @queue_name) do |message|
-            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
-            browse_data = message.data
-          end
-          
-          # Consume Message
-          session.consume(:queue_name => @queue_name) do |message|
-            assert_equal message.java_kind_of?(javax.jms::TextMessage), true
-            data = message.data
-          end
-        end
-        assert_equal data, 'Hello World'
-        assert_equal browse_data, 'Hello World'
-      end
-    end
-
   end
 end

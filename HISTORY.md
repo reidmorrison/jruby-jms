@@ -1,3 +1,11 @@
+## 0.10.1 (2011-02-21)
+
+* Fix persistence typo and add message test cases
+
+## 0.10.0 (2011-02-10)
+
+* Refactoring interface
+
 ## 0.9.0 (2011-01-23)
 
 * Revised API with cleaner interface

@@ -24,8 +24,8 @@ module javax.jms::MessageConsumer
   #         Note: Messages may still be on the queue, but the broker has not supplied any messages
   #                   in the time interval specified
   #    Default: 0
-  def get(parms={})
-    timeout = parms[:timeout] || 0
+  def get(params={})
+    timeout = params[:timeout] || 0
     if timeout == -1
       self.receive
     elsif timeout == 0
@@ -54,19 +54,19 @@ module javax.jms::MessageConsumer
   #              with :statistics => true
   #
   #              The statistics gathered are returned when :statistics => true and :async => false
-  def each(parms={}, &proc)
+  def each(params={}, &proc)
     raise "Destination::each requires a code block to be executed for each message received" unless proc
 
     message_count = nil
     start_time = nil
 
-    if parms[:statistics]
+    if params[:statistics]
       message_count = 0
       start_time = Time.now
     end
 
     # Receive messages according to timeout
-    while message = self.get(parms) do
+    while message = self.get(params) do
       proc.call(message)
       message_count += 1 if message_count
     end
@@ -97,10 +97,10 @@ module javax.jms::MessageConsumer
   #
   #              The statistics gathered are returned when :statistics => true and :async => false
   #
-  def on_message(parms={}, &proc)
+  def on_message(params={}, &proc)
     raise "MessageConsumer::on_message requires a code block to be executed for each message received" unless proc
 
-    @listener = JMS::MessageListener.new(parms,&proc)
+    @listener = JMS::MessageListener.new(params,&proc)
     self.setMessageListener @listener
   end
 

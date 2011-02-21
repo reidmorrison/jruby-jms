@@ -40,7 +40,7 @@ module JMS
   #    :transport_type => com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
   #    :username => 'mqm'
   #  ) do |session|
-  #    session.consumer(:q_name=>'TEST', :mode=>:input) do |consumer|
+  #    session.consumer(:queue_name=>'TEST', :mode=>:input) do |consumer|
   #      if message = consumer.receive_no_wait
   #        puts "Data Received: #{message.data}"
   #      else
@@ -59,9 +59,9 @@ module JMS
     # call the supplied code block, then close the connection upon completion
     #
     # Returns the result of the supplied block
-    def self.start(parms = {}, &proc)
+    def self.start(params = {}, &proc)
       raise "Missing mandatory Block when calling JMS::Connection.start" unless proc
-      connection = Connection.new(parms)
+      connection = Connection.new(params)
       connection.start
       begin
         proc.call(connection)
@@ -77,9 +77,9 @@ module JMS
     # Useful when only a single session is required in the current thread
     #
     # Note: It is important that each thread have its own session to support transactions
-    def self.session(parms = {}, &proc)
-      self.start(parms) do |connection|
-        connection.session(parms, &proc)
+    def self.session(params = {}, &proc)
+      self.start(params) do |connection|
+        connection.session(params, &proc)
       end
     end
 
@@ -287,9 +287,9 @@ module JMS
     #  :options => any of the javax.jms.Session constants
     #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
-    def session(parms={}, &proc)
+    def session(params={}, &proc)
       raise "Missing mandatory Block when calling JMS::Connection#session" unless proc
-      session = self.create_session(parms)
+      session = self.create_session(params)
       begin
         proc.call(session)
       ensure
@@ -328,9 +328,9 @@ module JMS
     #        session is transacted.
     #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
-    def create_session(parms={})
-      transacted = parms[:transacted] || false
-      options = parms[:options] || javax.jms.Session::AUTO_ACKNOWLEDGE
+    def create_session(params={})
+      transacted = params[:transacted] || false
+      options = params[:options] || javax.jms.Session::AUTO_ACKNOWLEDGE
       @jms_connection.create_session(transacted, options)
     end
 
@@ -425,13 +425,13 @@ module JMS
     #                    Default: 1
     #
     # Consumer Parameters:
-    #   :q_name     => String: Name of the Queue to return
+    #   :queue_name     => String: Name of the Queue to return
     #                  Symbol: :temporary => Create temporary queue
     #                  Mandatory unless :topic_name is supplied
     #     Or,
     #   :topic_name => String: Name of the Topic to write to or subscribe to
     #                  Symbol: :temporary => Create temporary topic
-    #                  Mandatory unless :q_name is supplied
+    #                  Mandatory unless :queue_name is supplied
     #     Or,
     #   :destination=> Explicit javaxJms::Destination to use
     #
@@ -461,15 +461,15 @@ module JMS
     # Note: Also supply connection::on_exception so that connection failures can be handled
     #
     #
-    def on_message(parms, &proc)
+    def on_message(params, &proc)
       raise "JMS::Connection must be connected prior to calling JMS::Connection::on_message" unless @sessions && @consumers
 
-      consumer_count = parms[:session_count] || 1
+      consumer_count = params[:session_count] || 1
       consumer_count.times do
-        session = self.create_session(parms)
-        consumer = session.consumer(parms)
+        session = self.create_session(params)
+        consumer = session.consumer(params)
         if session.transacted?
-          consumer.on_message(parms) do |message|
+          consumer.on_message(params) do |message|
             begin
               proc.call(message) ? session.commit : session.rollback
             rescue => exc
@@ -478,7 +478,7 @@ module JMS
             end
           end
         else
-          consumer.on_message(parms, &proc)
+          consumer.on_message(params, &proc)
         end
         @consumers << consumer
         @sessions << session

@@ -17,7 +17,7 @@ config = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))[jms_provid
 raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless config
 
 JMS::Connection.session(config) do |session|
-  session.producer(:q_name => 'ExampleQueue') do |producer|
+  session.producer(:queue_name => 'ExampleQueue') do |producer|
     producer.send(session.message("Hello World"))
   end
 end

@@ -57,15 +57,15 @@ module javax.jms::Message
   # Header Fields - Attributes of the message
   
   # Return the JMS Delivery Mode as a symbol
-  #   :peristent
-  #   :non_peristent
+  #   :persistent
+  #   :non_persistent
   #   other: Value from javax.jms.DeliveryMode
   def jms_delivery_mode
     case getJMSDeliveryMode
     when javax.jms.DeliveryMode::PERSISTENT
-      :peristent
+      :persistent
     when javax.jms.DeliveryMode::NON_PERSISTENT
-      :non_peristent
+      :non_persistent
     else
       getJMSDeliveryMode
     end
@@ -73,14 +73,14 @@ module javax.jms::Message
   
   # Set the JMS Delivery Mode
   # Valid values for mode
-  #   :peristent
-  #   :non_peristent
+  #   :persistent
+  #   :non_persistent
   #   other: Any constant from javax.jms.DeliveryMode
   def jms_delivery_mode=(mode)
     val = case mode
-    when :peristent
+    when :persistent
       javax.jms.DeliveryMode::PERSISTENT
-    when :non_peristent
+    when :non_persistent
       javax.jms.DeliveryMode::NON_PERSISTENT
     else
       mode

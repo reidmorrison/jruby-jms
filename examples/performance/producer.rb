@@ -20,7 +20,7 @@ raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless con
 JMS::Connection.session(config) do |session|
   start_time = Time.now
   
-  session.producer(:q_name => 'ExampleQueue') do |producer|
+  session.producer(:queue_name => 'ExampleQueue') do |producer|
     count.times do |i| 
       producer.send(session.message("Hello Producer #{i}"))
     end

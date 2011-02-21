@@ -161,19 +161,19 @@ module javax.jms::Session
   #     Or,
   #   :topic_name => String: Name of the Topic to write to or subscribe to
   #                  Symbol: :temporary => Create temporary topic
-  #                  Mandatory unless :q_name is supplied
+  #                  Mandatory unless :queue_name is supplied
   #     Or,
   #   :destination=> Explicit javaxJms::Destination to use
   #
   # Returns the result of the supplied block
-  def create_destination(parms)
+  def create_destination(params)
     # Allow a Java JMS destination object to be passed in 
-    return parms[:destination] if parms[:destination] && parms[:destination].java_kind_of?(javax.jms::Destination)
+    return params[:destination] if params[:destination] && params[:destination].java_kind_of?(javax.jms::Destination)
     
-    # :q_name is deprecated
-    queue_name = parms[:queue_name] || parms[:q_name]
-    topic_name = parms[:topic_name]
-    raise "Missing mandatory parameter :q_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
+    # :queue_name is deprecated
+    queue_name = params[:queue_name] || params[:queue_name]
+    topic_name = params[:topic_name]
+    raise "Missing mandatory parameter :queue_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
 
     if queue_name
       queue_name == :temporary ? create_temporary_queue : create_queue(queue_name)
@@ -208,16 +208,16 @@ module javax.jms::Session
   #     Or,
   #   :topic_name => String: Name of the Topic to write to or subscribe to
   #                  Symbol: :temporary => Create temporary topic
-  #                  Mandatory unless :q_name is supplied
+  #                  Mandatory unless :queue_name is supplied
   #     Or,
   #   :destination=> Explicit javaxJms::Destination to use
   #
   # Returns the result of the supplied block
-  def destination(parms={}, &block)
+  def destination(params={}, &block)
     raise "Missing mandatory Block when calling JMS::Session#destination" unless block
     dest = nil
     begin
-      dest = create_destination(parms)
+      dest = create_destination(params)
       block.call(dest)
     ensure
       # Delete Temporary Queue / Topic
@@ -283,17 +283,17 @@ module javax.jms::Session
   # Call the Proc if supplied, then automatically close the producer
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name     => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
   #   :topic_name => String: Name of the Topic to write to or subscribe to
   #                  Symbol: :temporary => Create temporary topic
-  #                  Mandatory unless :q_name is supplied
+  #                  Mandatory unless :queue_name is supplied
   #     Or,
   #   :destination=> Explicit javax.jms::Destination to use
-  def producer(parms, &proc)
-    destination = create_destination(parms)
+  def producer(params, &proc)
+    destination = create_destination(params)
     # Call original java method with this destination
     #p = java_send :create_producer, [javax.jms::Destination], destination
     p = create_producer(destination)
@@ -314,13 +314,13 @@ module javax.jms::Session
   # Call the Proc if supplied, then automatically close the consumer
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name     => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
   #   :topic_name => String: Name of the Topic to write to or subscribe to
   #                  Symbol: :temporary => Create temporary topic
-  #                  Mandatory unless :q_name is supplied
+  #                  Mandatory unless :queue_name is supplied
   #     Or,
   #   :destination=> Explicit javaxJms::Destination to use
   #
@@ -329,13 +329,13 @@ module javax.jms::Session
   #   :no_local   => Determine whether messages published by its own connection
   #                  should be delivered to it
   #                  Default: false
-  def consumer(parms, &proc)
-    destination = create_destination(parms)
+  def consumer(params, &proc)
+    destination = create_destination(params)
     c = nil
-    if parms[:no_local]
-      c = create_consumer(destination, parms[:selector] || '', parms[:no_local])
-    elsif parms[:selector]
-      c = create_consumer(destination, parms[:selector])
+    if params[:no_local]
+      c = create_consumer(destination, params[:selector] || '', params[:no_local])
+    elsif params[:selector]
+      c = create_consumer(destination, params[:selector])
     else
       c = create_consumer(destination)
     end
@@ -355,13 +355,13 @@ module javax.jms::Session
   # A consumer can read messages from the queue or topic
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name     => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
   #   :topic_name => String: Name of the Topic to write to or subscribe to
   #                  Symbol: :temporary => Create temporary topic
-  #                  Mandatory unless :q_name is supplied
+  #                  Mandatory unless :queue_name is supplied
   #     Or,
   #   :destination=> Explicit javaxJms::Destination to use
   #
@@ -379,10 +379,10 @@ module javax.jms::Session
   #                     in the time interval specified
   #      Default: 0
   #
-  def consume(parms, &proc)
-    c = self.consumer(parms)
+  def consume(params, &proc)
+    c = self.consumer(params)
     begin
-      c.each(parms, &proc)
+      c.each(params, &proc)
     ensure
       c.close
     end
@@ -395,7 +395,7 @@ module javax.jms::Session
   # Call the Proc if supplied, then automatically close the consumer
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name     => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
@@ -403,13 +403,13 @@ module javax.jms::Session
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
-  def browser(parms, &proc)
+  def browser(params, &proc)
     raise "Session::browser requires a code block to be executed" unless proc
 
-    destination = create_destination(parms)
+    destination = create_destination(params)
     b = nil
-    if parms[:selector]
-      b = create_browser(destination, parms[:selector])
+    if params[:selector]
+      b = create_browser(destination, params[:selector])
     else
       b = create_browser(destination)
     end
@@ -428,7 +428,7 @@ module javax.jms::Session
   # Browse the specified queue, calling the Proc supplied for each message found
   #
   # Parameters:
-  #   :q_name     => String: Name of the Queue to return
+  #   :queue_name     => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
@@ -436,19 +436,19 @@ module javax.jms::Session
   #
   #   :selector   => Filter which messages should be returned from the queue
   #                  Default: All messages
-  def browse(parms={}, &proc)
-    self.browser(parms) {|b| b.each(parms, &proc)}
+  def browse(params={}, &proc)
+    self.browser(params) {|b| b.each(params, &proc)}
   end
 end
 
 # Workaround for IBM MQ JMS implementation that implements an undocumented consume method
 if defined? com.ibm.mq.jms::MQSession
   class com.ibm.mq.jms::MQSession
-    def consume(parms, &proc)
+    def consume(params, &proc)
       result = nil
-      c = self.consumer(parms)
+      c = self.consumer(params)
       begin
-        result = c.each(parms, &proc)
+        result = c.each(params, &proc)
       ensure
         c.close
       end

@@ -32,10 +32,10 @@ module JMS
     #              is called again with :statistics => true
     #
     #              The statistics gathered are returned when :statistics => true and :async => false
-    def initialize(parms={}, &proc)
+    def initialize(params={}, &proc)
       @proc = proc
 
-      if parms[:statistics]
+      if params[:statistics]
         @message_count = 0
         @start_time = Time.now
       end

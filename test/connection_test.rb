@@ -86,7 +86,7 @@ class JMSTest < Test::Unit::TestCase
       assert_nil connection.close
     end
 
-    should 'Create a session from the connection with parms' do
+    should 'Create a session from the connection with params' do
       connection = JMS::Connection.new(@config)
       
       session_parms = { 
@@ -105,7 +105,7 @@ class JMSTest < Test::Unit::TestCase
       assert_nil connection.close
     end
 
-    should 'Create a session from the connection with block and parms' do
+    should 'Create a session from the connection with block and params' do
       JMS::Connection.start(@config) do |connection|
       
         session_parms = { 
@@ -122,7 +122,7 @@ class JMSTest < Test::Unit::TestCase
       end
     end
 
-    should 'Create a session from the connection with block and parms opposite test' do
+    should 'Create a session from the connection with block and params opposite test' do
       JMS::Connection.start(@config) do |connection|
       
         session_parms = { 
@@ -143,7 +143,7 @@ class JMSTest < Test::Unit::TestCase
       should 'start an on_message handler' do
         JMS::Connection.start(@config) do |connection|
           value = nil
-          connection.on_message(:transacted => true, :q_name => :temporary) do |message|
+          connection.on_message(:transacted => true, :queue_name => :temporary) do |message|
             value = "received"
           end
         end

@@ -16,7 +16,7 @@
 
 module javax.jms::QueueBrowser
   # For each message on the queue call the supplied Proc
-  def each(parms={}, &proc)
+  def each(params={}, &proc)
     raise "javax.jms.QueueBrowser::each requires a code block to be executed for each message received" unless proc
 
     e = self.getEnumeration
