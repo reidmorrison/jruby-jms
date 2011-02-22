@@ -1,14 +1,13 @@
-# jruby-jms
+## jruby-jms
 
 * http://github.com/reidmorrison/jruby-jms
 
-## Current Activities & Backward Compatibility
+### Current Activities & Backward Compatibility
 
 Please read the documentation in the source files for now. Currently looking 
 into the rdoc doc generation issue for JRuby extended Java interfaces and classes.
 
 There may still be some changes to the API to make things better and/or simpler.
-
 Once the code goes to V1.0.0 I will make every effort to not break the 
 existing interface in any way.
 
@@ -40,7 +39,7 @@ API is available to you at any time.
 
 ### Install
 
-    gem install jruby-jms
+    jgem install jruby-jms
 
 ### Simplification
 
@@ -95,12 +94,10 @@ topic they are interested in
 
 ### Producer
 
-Producers write message to a queue or topic
+Producers write messages to queues or topics
 
 ActiveMQ Example:
     require 'rubygems'
-    
-    # Include JMS after ActiveMQ
     require 'jms'
     
     # Connect to ActiveMQ
@@ -111,7 +108,7 @@ ActiveMQ Example:
     }
 
     JMS::Connection.session(config) do |session|
-      session.producer(:q_name => 'ExampleQueue') do |producer|
+      session.producer(:queue_name => 'ExampleQueue') do |producer|
         producer.send(session.message("Hello World"))
       end
     end
@@ -122,8 +119,6 @@ Consumers read message from a queue or topic
 
 ActiveMQ Example:
     require 'rubygems'
-    
-    # Include JMS after ActiveMQ
     require 'jms'
     
     # Connect to ActiveMQ
@@ -134,7 +129,7 @@ ActiveMQ Example:
     }
     
     JMS::Connection.session(config) do |session|
-      session.consume(:q_name => 'ExampleQueue', :timeout=>1000) do |message|
+      session.consume(:queue_name => 'ExampleQueue', :timeout=>1000) do |message|
         p message
       end
     end
@@ -143,9 +138,6 @@ ActiveMQ Example:
 
 jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS) 
 followed by many JMS Providers.
-
-In order to communicate with a JMS provider jruby-jms needs the jar files in the
-CLASSPATH that are supplied by the JMS Provider.
 
 ## Threading
 
@@ -166,16 +158,18 @@ Ruby logger. The logger can also be replaced by calling Connection.logger=
 
 ## Dependencies
 
+### JMS V1.1 Provider
+
+In order to communicate with a JMS V 1.1 provider jruby-jms needs the jar files supplied
+by the JMS provider. As in the examples above the jar files can be specified in
+the configuration element :require_jars. Otherwise, the jars must be explicitly
+required in the Ruby code:
+  `require "~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"`
+
 ### JRuby
 
 jruby-jms has been tested against JRuby 1.5.1 and 1.6, but should work with any
 current JRuby version.
-
-### JMS
-
-Every JMS Provider has details on which jar files to include in your CLASSPATH
-for their JMS client to work. Some examples for connection settings are covered
-in the Connection.new documentation
 
 ## Development
 
@@ -187,7 +181,7 @@ First clone the repo and run the tests:
     cd jruby-jms
     jruby -S rake test
 
-Feel free to ping the mailing list with any issues and we'll try to resolve it.
+Feel free to submit any issues and we'll try to resolve it.
 
 ## Contributing
 
