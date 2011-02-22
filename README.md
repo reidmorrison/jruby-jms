@@ -1,12 +1,11 @@
-jruby-jms
-=========
+# jruby-jms
 
 * http://github.com/reidmorrison/jruby-jms
 
-### Current Activities & Backward Compatibility
+## Current Activities & Backward Compatibility
 
-Please read the source files for now for documentation. Looking into rdoc doc
-generation issue.
+Please read the documentation in the source files for now. Currently looking 
+into the rdoc doc generation issue for JRuby extended Java interfaces and classes.
 
 There may still be some changes to the API to make things better and/or simpler.
 
@@ -54,8 +53,7 @@ or Producer that is independent of whether it is producing or consuming to/from
 or a Topic or a Queue. The complexity of which JMS class is used is taken care
 of by jruby-jms.
 
-Concepts & Terminology
-----------------------
+## Concepts & Terminology
 
 ### Java Message Service (JMS) API
 
@@ -141,8 +139,7 @@ ActiveMQ Example:
       end
     end
 
-Overview
---------
+## Overview
 
 jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS) 
 followed by many JMS Providers.
@@ -150,8 +147,7 @@ followed by many JMS Providers.
 In order to communicate with a JMS provider jruby-jms needs the jar files in the
 CLASSPATH that are supplied by the JMS Provider.
 
-Threading
----------
+## Threading
 
 A JMS::Connection instance can be shared between threads, whereas a session, 
 consumer, producer, and any artifacts created by the session should only be 
@@ -162,17 +158,13 @@ that thread blocked on Consumer.receive. Or, even better use Connection.on_messa
 which will create a session, within which any message received from the specified
 queue or topic match will be passed to the block.
 
-### Example
-
-Logging
--------
+## Logging
 
 jruby-jms detects the logging available in the current environment.
 When running under Rails it will use the Rails logger, otherwise the standard
 Ruby logger. The logger can also be replaced by calling Connection.logger=
 
-Dependencies
-------------
+## Dependencies
 
 ### JRuby
 
@@ -185,8 +177,7 @@ Every JMS Provider has details on which jar files to include in your CLASSPATH
 for their JMS client to work. Some examples for connection settings are covered
 in the Connection.new documentation
 
-Development
------------
+## Development
 
 Want to contribute to jruby-jms?
 
@@ -198,51 +189,30 @@ First clone the repo and run the tests:
 
 Feel free to ping the mailing list with any issues and we'll try to resolve it.
 
-
-Contributing
-------------
+## Contributing
 
 Once you've made your great commits:
 
-1. [Fork][1] jruby-jms
+1. [Fork](http://help.github.com/forking/) jruby-jms
 2. Create a topic branch - `git checkout -b my_branch`
 3. Push to your branch - `git push origin my_branch`
-4. Create an [Issue][2] with a link to your branch
+4. Create an [Issue](http://github.com/reidmorrison/jruby-jms/issues) with a link to your branch
 5. That's it!
 
-You might want to checkout our [Contributing][cb] wiki page for information
-on coding standards, new features, etc.
-
-
-Mailing List
-------------
-
-TBA
-
-Meta
-----
+## Meta
 
 * Code: `git clone git://github.com/reidmorrison/jruby-jms.git`
 * Home: <http://github.com/reidmorrison/jruby-jms>
-* Docs: <http://jruby-jms.github.com/jruby-jms/>
 * Bugs: <http://github.com/reidmorrison/jruby-jms/issues>
-* List: TBA
-* Gems: <http://gemcutter.org/gems/jruby-jms>
+* Gems: <http://rubygems.org/gems/jruby-jms>
 
-This project uses [Semantic Versioning][sv].
+This project uses [Semantic Versioning](http://semver.org/).
 
-
-Author
-------
+## Author
 
 Reid Morrison :: rubywmq@gmail.com :: @reidmorrison
 
-[1]: http://help.github.com/forking/
-[2]: http://github.com/reidmorrison/jruby-jms/issues
-[sv]: http://semver.org/
-
-License
--------
+## License
 
 Copyright 2008 - 2011  J. Reid Morrison
 
