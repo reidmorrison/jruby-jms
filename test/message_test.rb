@@ -43,7 +43,7 @@ class JMSTest < Test::Unit::TestCase
     should 'produce, browse and consume messages to/from a queue' do
       JMS::Connection.session(@config) do |session|
         assert_not_nil session
-        data = nil
+        data = :timed_out
         browse_data = nil
         session.producer(:queue_name => @queue_name) do |producer|
           # Send Message

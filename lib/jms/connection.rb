@@ -107,7 +107,8 @@ module JMS
         rescue Exception => exc
           JMS::logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
         end
-      end
+      end if jar_list
+      
       require 'jms/message_listener'
       require 'jms/javax_jms_message'
       require 'jms/javax_jms_text_message'
@@ -223,7 +224,7 @@ module JMS
 
       # Load Jar files on demand so that they do not need to be in the CLASSPATH
       # of JRuby lib directory
-      fetch_dependencies(params[:require_jars]) if params[:require_jars]
+      fetch_dependencies(params[:require_jars])
 
       connection_factory = nil
       factory = params[:factory]
