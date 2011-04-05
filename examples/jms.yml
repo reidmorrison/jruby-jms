@@ -10,8 +10,10 @@ activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar
-
+    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    
 hornetq:
   # Connect to a local HornetQ Broker using JNDI
   :jndi_name: /ConnectionFactory

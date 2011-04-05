@@ -113,6 +113,7 @@ module JMS
       require 'jms/javax_jms_message'
       require 'jms/javax_jms_text_message'
       require 'jms/javax_jms_map_message'
+      require 'jms/javax_jms_bytes_message'
       require 'jms/javax_jms_object_message'
       require 'jms/javax_jms_session'
       require 'jms/javax_jms_message_consumer'
