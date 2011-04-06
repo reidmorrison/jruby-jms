@@ -69,11 +69,11 @@ class JMSTest < Test::Unit::TestCase
     should 'support setting persistence using symbols and the java constants' do
       JMS::Connection.session(@config) do |session|
         message = session.message('Hello World')
-        assert_equal message.jms_delivery_mode, :non_persistent
-        message.jms_delivery_mode = :non_persistent
-        assert_equal message.jms_delivery_mode, :non_persistent
-        message.jms_delivery_mode = :persistent
-        assert_equal message.jms_delivery_mode, :persistent
+        assert_equal message.jms_delivery_mode_sym, :non_persistent
+        message.jms_delivery_mode_sym = :non_persistent
+        assert_equal message.jms_delivery_mode_sym, :non_persistent
+        message.jms_delivery_mode_sym = :persistent
+        assert_equal message.jms_delivery_mode_sym, :persistent
       end
     end  
       
@@ -83,8 +83,8 @@ class JMSTest < Test::Unit::TestCase
         data = nil
         session.producer(:queue_name => :temporary) do |producer|
           message = session.message('Hello World')
-          message.jms_delivery_mode = :non_persistent
-          assert_equal :non_persistent, message.jms_delivery_mode
+          message.jms_delivery_mode_sym = :non_persistent
+          assert_equal :non_persistent, message.jms_delivery_mode_sym
           assert_equal false, message.persistent?
           
           # Send Message
@@ -108,8 +108,8 @@ class JMSTest < Test::Unit::TestCase
         data = nil
         session.producer(:queue_name => :temporary) do |producer|
           message = session.message('Hello World')
-          message.jms_delivery_mode = :persistent
-          assert_equal :persistent, message.jms_delivery_mode
+          message.jms_delivery_mode_sym = :persistent
+          assert_equal :persistent, message.jms_delivery_mode_sym
           assert_equal true, message.persistent?
           
           # Send Message
@@ -119,7 +119,7 @@ class JMSTest < Test::Unit::TestCase
           session.consume(:destination => producer.destination) do |message|
             assert_equal message.java_kind_of?(javax.jms::TextMessage), true
             data = message.data
-            assert_equal :persistent, message.jms_delivery_mode
+            assert_equal :persistent, message.jms_delivery_mode_sym
             assert_equal true, message.persistent?
           end
         end

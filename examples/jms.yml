@@ -1,11 +1,13 @@
 # This YAML file contains the configuration options for several different
 # JMS Providers
 #
-# The Examples that ship with jruby-jms will use the entry 'default' unless
+# The Examples that ship with jruby-jms will use the entry 'activemq' unless
 # overriden at the command line. For example:
 #    jruby producer.rb activemq
 #
+
 ---
+# Active MQ Centralized Broker
 activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
@@ -14,6 +16,32 @@ activemq:
     - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
     - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
     
+# ActiveMQ In VM Broker (Supports messaging within a JVM instance)
+activemq-vm:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: vm://localhost
+  :object_message_serialization_defered: true
+  :require_jars:
+    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+
+# JBoss 4 Messaging
+  :jndi_name: ConnectionFactory
+  :jndi_context:
+    java.naming.factory.initial: org.jnp.interfaces.NamingContextFactory
+    java.naming.provider.url: jnp://localhost:1099
+    java.naming.security.principal: user
+    java.naming.security.credentials: pwd
+
+# Apache Qpid
+qpid:
+  :jndi_name: local
+  :jndi_context:
+    java.naming.factory.initial: org.apache.qpid.jndi.PropertiesFileInitialContextFactory
+    connectionfactory.local: amqp://guest:guest@clientid/testpath?brokerlist='tcp://localhost:5672'
+
+# HornetQ Broker
 hornetq:
   # Connect to a local HornetQ Broker using JNDI
   :jndi_name: /ConnectionFactory
@@ -30,3 +58,22 @@ hornetq:
     - ~/Applications/hornetq-2.1.2.Final/lib/jboss-jms-api.jar
     - ~/Applications/hornetq-2.1.2.Final/lib/jnp-client.jar
     - ~/Applications/hornetq-2.1.2.Final/lib/netty.jar
+
+# WebSphere MQ
+wmq:
+  :factory: com.ibm.mq.jms.MQQueueConnectionFactory
+  :queue_manager: LOCAL
+  :host_name: localhost
+  :channel: MY.CLIENT.CHL
+  :port: 1414
+  :transport_type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :username: mqm
+  :require_jars:
+    - /opt/mqm/lib/com.ibm.mqjms.jar
+    
+# Oracle AQ 9
+oracleaq:
+  :factory => 'JMS::OracleAQConnectionFactory',
+  :url => 'jdbc:oracle:thin:@hostname:1521:instanceid',
+  :username => 'aquser',
+  :password => 'mypassword'
