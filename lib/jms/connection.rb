@@ -32,15 +32,15 @@ module JMS
   #  require 'jms'
   #
   #  JMS::Connection.create_session(
-  #    :queue_manager=>'REID',   # Should be :q_mgr_name
-  #    :host_name=>'localhost',
-  #    :channel=>'MY.CLIENT.CHL',
-  #    :port=>1414,
-  #    :factory => com.ibm.mq.jms.MQQueueConnectionFactory,
-  #    :transport_type => com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
-  #    :username => 'mqm'
+  #    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+  #    :broker_url => 'tcp://localhost:61616',
+  #    :require_jars => [
+  #      '~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar',
+  #      '~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar',
+  #      '~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar',
+  #    ]
   #  ) do |session|
-  #    session.consumer(:queue_name=>'TEST', :mode=>:input) do |consumer|
+  #    session.consumer(:queue_name=>'TEST') do |consumer|
   #      if message = consumer.receive_no_wait
   #        puts "Data Received: #{message.data}"
   #      else
@@ -118,6 +118,7 @@ module JMS
       require 'jms/javax_jms_session'
       require 'jms/javax_jms_message_consumer'
       require 'jms/javax_jms_queue_browser'
+      require 'jms/oracle_a_q_connection_factory'
     end
 
     # Create a connection to the JMS provider
@@ -219,6 +220,8 @@ module JMS
     #    }
     #
     def initialize(params = {})
+      #TODO: Support passing in logging class through params
+      #
       # Used by ::on_message
       @sessions = []
       @consumers = []
@@ -286,8 +289,25 @@ module JMS
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
-    #  :options => any of the javax.jms.Session constants
-    #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #      Note: :options below are ignored if this value is set to :true
+    #      
+    #  :options => any of the javax.jms.Session constants:
+    #     Note: :options are ignored if :transacted => true
+    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #        With this acknowledgment mode, the session automatically acknowledges
+    #        a client's receipt of a message either when the session has successfully
+    #        returned from a call to receive or when the message listener the session has
+    #        called to process the message successfully returns.
+    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #        With this acknowledgment mode, the client acknowledges a consumed
+    #        message by calling the message's acknowledge method.
+    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #        This acknowledgment mode instructs the session to lazily acknowledge
+    #        the delivery of messages.
+    #     javax.jms.Session::SESSION_TRANSACTED
+    #        This value is returned from the method getAcknowledgeMode if the
+    #        session is transacted.
+    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
     def session(params={}, &proc)
       raise "Missing mandatory Block when calling JMS::Connection#session" unless proc
@@ -311,9 +331,10 @@ module JMS
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
-    #      Note: :options below is ignored if this value is set to :true
+    #      Note: :options below are ignored if this value is set to :true
+    #      
     #  :options => any of the javax.jms.Session constants:
-    #     Note: :options is ignored of :transacted => true
+    #     Note: :options are ignored if :transacted => true
     #     javax.jms.Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
@@ -368,7 +389,7 @@ module JMS
     # See ::on_exception to set a Ruby Listener
     # Returns: nil
     def exception_listener=(listener)
-      setExceptionListener(listener)
+      @jms_connection.setExceptionListener(listener)
     end
     
     # Whenever an exception occurs the supplied block is called
@@ -379,13 +400,13 @@ module JMS
     # see: http://download.oracle.com/javaee/6/api/javax/jms/JMSException.html
     # 
     # Example:
-    #   connection.on_message do |jms_exception|
+    #   connection.on_exception do |jms_exception|
     #     puts "JMS Exception has occurred: #{jms_exception}"
     #   end
     #
     # Returns: nil
     def on_exception(&block)
-      setExceptionListener(block)
+      @jms_connection.setExceptionListener(block)
     end
     
     # Gets the metadata for this connection
@@ -400,11 +421,8 @@ module JMS
       "JMS::Connection provider: #{md.getJMSProviderName} v#{md.getProviderVersion}, JMS v#{md.getJMSVersion}"
     end
 
-    # TODO: Return a pretty print version of the current JMS Connection
-    #    def to_s
-    #    end
-
     # Receive messages in a separate thread when they arrive
+    # 
     # Allows messages to be recieved in a separate thread. I.e. Asynchronously
     # This method will return to the caller before messages are processed.
     # It is then the callers responsibility to keep the program active so that messages
@@ -415,8 +433,25 @@ module JMS
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
-    #  :options => any of the javax.jms.Session constants
-    #      Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #      Note: :options below are ignored if this value is set to :true
+    #      
+    #  :options => any of the javax.jms.Session constants:
+    #     Note: :options are ignored if :transacted => true
+    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #        With this acknowledgment mode, the session automatically acknowledges
+    #        a client's receipt of a message either when the session has successfully
+    #        returned from a call to receive or when the message listener the session has
+    #        called to process the message successfully returns.
+    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #        With this acknowledgment mode, the client acknowledges a consumed
+    #        message by calling the message's acknowledge method.
+    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #        This acknowledgment mode instructs the session to lazily acknowledge
+    #        the delivery of messages.
+    #     javax.jms.Session::SESSION_TRANSACTED
+    #        This value is returned from the method getAcknowledgeMode if the
+    #        session is transacted.
+    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
     #
     #   :session_count : Number of sessions to create, each with their own consumer which
     #                    in turn will call the supplied Proc.
@@ -427,7 +462,7 @@ module JMS
     #                    Default: 1
     #
     # Consumer Parameters:
-    #   :queue_name     => String: Name of the Queue to return
+    #   :queue_name => String: Name of the Queue to return
     #                  Symbol: :temporary => Create temporary queue
     #                  Mandatory unless :topic_name is supplied
     #     Or,
@@ -439,8 +474,9 @@ module JMS
     #
     #   :selector   => Filter which messages should be returned from the queue
     #                  Default: All messages
+    #                  
     #   :no_local   => Determine whether messages published by its own connection
-    #                  should be delivered to it
+    #                  should be delivered to the supplied block
     #                  Default: false
     #
     #   :statistics Capture statistics on how many messages have been read
@@ -452,16 +488,13 @@ module JMS
     #              Also, the start time and message count is not reset until MessageConsumer::each
     #              is called again with :statistics => true
     #
-    #              The statistics gathered are returned when :statistics => true and :async => false
-    #
-    # Usage: For transacted sessions (the default) the Proc supplied must return
-    #        either true or false:
+    # Usage: For transacted sessions the block supplied must return either true or false:
     #          true => The session is committed
     #          false => The session is rolled back
     #          Any Exception => The session is rolled back
     #
-    # Note: Also supply connection::on_exception so that connection failures can be handled
-    #
+    # Note: Separately invoke Connection#on_exception so that connection failures can be handled
+    #       since on_message will Not be called if the connection is lost
     #
     def on_message(params, &proc)
       raise "JMS::Connection must be connected prior to calling JMS::Connection::on_message" unless @sessions && @consumers
@@ -491,21 +524,39 @@ module JMS
       @consumers.collect{|consumer| consumer.on_message_statistics}
     end
 
-  end
-
-  # Wrapper to support Oracle AQ
-  class OracleAQConnectionFactory
-    attr_accessor :username, :url
-    attr_writer :password
-
-    # Creates a connection per standard JMS 1.1 techniques from the Oracle AQ JMS Interface
-    def create_connection
-      cf = oracle.jms.AQjmsFactory.getConnectionFactory(@url, java.util.Properties.new)
-      if username
-        cf.createConnection(@username, @password)
-      else
-        cf.createConnection()
-      end
+    # Since a Session can only be used by one thread at a time, we could create
+    # a Session for every thread. That could result in excessive unused Sessions.
+    # An alternative is to create a pool of sessions that can be shared by
+    # multiple threads.
+    #
+    # Each thread can request a session and then return it once it is no longer
+    # needed by that thread. The only way to get a session is pass a block so that 
+    # the Session is automatically returned to the pool upon completion of the block. 
+    #
+    # Parameters:
+    #   see regular session parameters from: JMS::Connection#initialize
+    #
+    # Additional parameters for controlling the session pool itself
+    #   :pool_name         Name of the pool as it shows up in the logger.
+    #                      Default: 'JMS::SessionPool'
+    #   :pool_size         Maximum Pool Size. Default: 10
+    #                      The pool only grows as needed and will never exceed
+    #                      :pool_size
+    #   :pool_warn_timeout Number of seconds to wait before logging a warning when a
+    #                      session in the pool is not available. Measured in seconds
+    #                      Default: 5.0
+    #   :pool_logger       Supply a logger that responds to #debug, #info, #warn and #debug?
+    #                      For example: Rails.logger
+    #                      Default: None
+    # Example:
+    #   session_pool = connection.create_session_pool(config)
+    #   
+    #   session_pool.session do |session|
+    #      producer.send(session.message("Hello World"))
+    #   end
+    def create_session_pool(params={})
+      require 'jms/session_pool' unless defined? JMS::SessionPool
+      JMS::SessionPool.new(self, params)
     end
   end
 

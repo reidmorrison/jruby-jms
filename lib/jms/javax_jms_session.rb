@@ -293,10 +293,7 @@ module javax.jms::Session
   #     Or,
   #   :destination=> Explicit javax.jms::Destination to use
   def producer(params, &proc)
-    destination = create_destination(params)
-    # Call original java method with this destination
-    #p = java_send :create_producer, [javax.jms::Destination], destination
-    p = create_producer(destination)
+    p = self.create_producer(self.create_destination(params))
     if proc
       begin
         proc.call(p)
@@ -314,7 +311,7 @@ module javax.jms::Session
   # Call the Proc if supplied, then automatically close the consumer
   #
   # Parameters:
-  #   :queue_name     => String: Name of the Queue to return
+  #   :queue_name => String: Name of the Queue to return
   #                  Symbol: :temporary => Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,

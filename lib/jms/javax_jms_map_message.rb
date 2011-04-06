@@ -86,6 +86,6 @@ module javax.jms::MapMessage
   # Does map include specified key
   def include?(key)
     # Ensure a Ruby true is returned
-    item_exists key == true
+    item_exists(key) == true
   end
 end

@@ -1,3 +1,15 @@
+## 0.11.0 (2011-04-06)
+
+* Compatibility with JRuby 1.6
+* I hate doing this, but unfortunately there is a small breaking change in this release:
+** We can no longer pass symbols into the following methods:
+*** jms_delivery_mode
+*** jms_delivery_mode=
+** Just rename existing uses of the above methods to:
+*** jms_delivery_mode_sym
+*** jms_delivery_mode_sym=
+* Added Session Pool - requires GenePool as a dependency if used
+
 ## 0.10.1 (2011-02-21)
 
 * Fix persistence typo and add message test cases

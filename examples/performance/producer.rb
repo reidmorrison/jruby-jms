@@ -27,5 +27,5 @@ JMS::Connection.session(config) do |session|
   end
 
   duration = Time.now - start_time
-  puts "Delivered #{count} messages in #{duration} seconds at #{count/duration} messages per second"
+  puts "Delivered #{count} messages. #{(duration*1000.0)/count} ms per message"
 end

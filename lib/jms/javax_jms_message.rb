@@ -54,7 +54,7 @@ module javax.jms::Message
   #  Clears out the properties of this message
   #
   
-  # For Backward compatibility with pre-JRuby 1.6
+  # For Backward compatibility with JRuby prior to 1.6
   # JRuby 1.6 now does all this for us. Thank you headius :)
   unless self.instance_methods.include? :jms_delivery_mode
   

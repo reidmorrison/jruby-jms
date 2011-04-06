@@ -75,7 +75,8 @@ module javax.jms::MessageConsumer
       duration = Time.now - start_time
       {:messages => message_count,
         :duration => duration,
-        :messages_per_second => (message_count/duration).to_i}
+        :messages_per_second => (message_count/duration).to_i,
+        :ms_per_msg => (duration*1000.0)/message_count}
     end
   end
 
