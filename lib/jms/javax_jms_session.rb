@@ -170,8 +170,8 @@ module javax.jms::Session
     # Allow a Java JMS destination object to be passed in 
     return params[:destination] if params[:destination] && params[:destination].java_kind_of?(javax.jms::Destination)
     
-    # :queue_name is deprecated
-    queue_name = params[:queue_name] || params[:queue_name]
+    # :q_name is deprecated
+    queue_name = params[:queue_name] || params[:q_name]
     topic_name = params[:topic_name]
     raise "Missing mandatory parameter :queue_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
 

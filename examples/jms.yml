@@ -12,19 +12,26 @@ activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
-    
+    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
+# ActiveMQ 5.5 Requires additional jar files
+#    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
+#    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
+#    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+
 # ActiveMQ In VM Broker (Supports messaging within a JVM instance)
 activemq-vm:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
-  :broker_url: vm://localhost
+  :broker_url: vm://127.0.0.1
   :object_message_serialization_defered: true
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
+
+# ActiveMQ with failover to slave instance
+activemq-ha:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: failover://(tcp://127.0.0.1:61616,tcp://192.168.0.23:61616)?randomize=false&timeout=30000&initialReconnectDelay=100&useExponentialBackOff=true
+  :require_jars:
+    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
 
 # JBoss 4 Messaging
   :jndi_name: ConnectionFactory
@@ -70,7 +77,7 @@ wmq:
   :username: mqm
   :require_jars:
     - /opt/mqm/lib/com.ibm.mqjms.jar
-    
+
 # Oracle AQ 9
 oracleaq:
   :factory => 'JMS::OracleAQConnectionFactory',

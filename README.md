@@ -4,11 +4,11 @@
 
 ### Current Activities & Backward Compatibility
 
-Please read the documentation in the source files for now. Currently looking 
+Please read the documentation in the source files for now. Currently looking
 into the rdoc doc generation issue for JRuby extended Java interfaces and classes.
 
 There may still be some changes to the API to make things better and/or simpler.
-Once the code goes to V1.0.0 I will make every effort to not break the 
+Once the code goes to V1.0.0 I will make every effort to not break the
 existing interface in any way.
 
 ### Feedback is welcome and appreciated :)
@@ -21,13 +21,13 @@ existing interface in any way.
 ### Introduction
 
 jruby-jms has been around in my toolbox since 2008. Since I was not an expert
-in JMS I have held off releasing to the wild. I believe it is now of sufficient 
+in JMS I have held off releasing to the wild. I believe it is now of sufficient
 quality and usefulness to release into the wild. In fact it has been used
 in production at an enterprise site for 2 years now.
 
-jruby-jms attempts to "rubify" the Java JMS API without 
+jruby-jms attempts to "rubify" the Java JMS API without
 compromising performance. It does this by sprinkling "Ruby-goodness" into the
-existing JMS Java interfaces, I.e. By adding Ruby methods to the existing 
+existing JMS Java interfaces, I.e. By adding Ruby methods to the existing
 classes and interfaces. Since jruby-jms exposes the JMS
 Java classes directly there is no performance impact that would have been
 introduced had the entire API been wrapped in a Ruby layer.
@@ -44,7 +44,7 @@ API is available to you at any time.
 ### Simplification
 
 One of the difficulties with the regular JMS API is that it use completely
-separate classes for Topics and Queues in JMS 1.1. This means that once a 
+separate classes for Topics and Queues in JMS 1.1. This means that once a
 program writes to a Queue for example, that without changing the program it
 could not be changed to write to a topic. Also a consumer on a topic or a queue
 are identical. jruby-jms fixes this issue by allowing you to have a Consumer
@@ -68,7 +68,7 @@ server as either a Broker or Queue Manager. The Broker or Queue Manager is the
 centralized "server" through which all messages pass through.
 
 Some Brokers support an in-vm broker instance so that messages can be passed
-between producers and consumers within the same Java Virtual Machine (JVM) 
+between producers and consumers within the same Java Virtual Machine (JVM)
 instance. This removes the need to make any network calls. Highly recommended
 for passing messages between threads in the same JVM.
 
@@ -82,7 +82,7 @@ takes care of the rest.
 
 ### Queue
 
-A queue used for holding messages. 
+A queue used for holding messages.
 The queue is defined prior to the message being sent and is used to hold the
 messages. The consumer does not have to be running in order to receive messages.
 
@@ -99,12 +99,16 @@ Producers write messages to queues or topics
 ActiveMQ Example:
     require 'rubygems'
     require 'jms'
-    
+
     # Connect to ActiveMQ
     config = {
       :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
       :broker_url => 'tcp://localhost:61616',
-      :require_jars => ["~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"]
+      :require_jars => [
+        "~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar",
+        "~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar",
+        "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar"
+      ]
     }
 
     JMS::Connection.session(config) do |session|
@@ -120,14 +124,14 @@ Consumers read message from a queue or topic
 ActiveMQ Example:
     require 'rubygems'
     require 'jms'
-    
+
     # Connect to ActiveMQ
     config = {
       :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
       :broker_url => 'tcp://localhost:61616',
       :require_jars => ["~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"]
     }
-    
+
     JMS::Connection.session(config) do |session|
       session.consume(:queue_name => 'ExampleQueue', :timeout=>1000) do |message|
         p message
@@ -136,13 +140,13 @@ ActiveMQ Example:
 
 ## Overview
 
-jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS) 
+jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS)
 followed by many JMS Providers.
 
 ## Threading
 
-A JMS::Connection instance can be shared between threads, whereas a session, 
-consumer, producer, and any artifacts created by the session should only be 
+A JMS::Connection instance can be shared between threads, whereas a session,
+consumer, producer, and any artifacts created by the session should only be
 used by one thread at a time.
 
 For consumers, it is recommended to create a session for each thread and leave

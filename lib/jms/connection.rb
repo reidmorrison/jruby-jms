@@ -108,7 +108,7 @@ module JMS
           JMS::logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
         end
       end if jar_list
-      
+
       require 'jms/message_listener'
       require 'jms/javax_jms_message'
       require 'jms/javax_jms_text_message'
@@ -270,7 +270,7 @@ module JMS
     def start
       @jms_connection.start
     end
-      
+
     # Temporarily stop delivery of incoming messages on this connection
     # Useful during a hot code update or other changes that need to be completed
     # without any new messages being processed
@@ -290,7 +290,7 @@ module JMS
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
-    #      
+    #
     #  :options => any of the javax.jms.Session constants:
     #     Note: :options are ignored if :transacted => true
     #     javax.jms.Session::AUTO_ACKNOWLEDGE
@@ -332,7 +332,7 @@ module JMS
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
-    #      
+    #
     #  :options => any of the javax.jms.Session constants:
     #     Note: :options are ignored if :transacted => true
     #     javax.jms.Session::AUTO_ACKNOWLEDGE
@@ -368,37 +368,37 @@ module JMS
 
       @jms_connection.close if @jms_connection
     end
-    
+
     # Gets the client identifier for this connection.
     def client_id
       @jms_connection.getClientID
     end
-          
+
     # Sets the client identifier for this connection.
     def client_id=(client_id)
       @jms_connection.setClientID(client_id)
     end
-    
+
     # Returns the ExceptionListener object for this connection
     # Returned class implements interface javax.jms.ExceptionListener
     def exception_listener
       @jms_connection.getExceptionListener
     end
- 
+
     # Sets an exception listener for this connection
     # See ::on_exception to set a Ruby Listener
     # Returns: nil
     def exception_listener=(listener)
       @jms_connection.setExceptionListener(listener)
     end
-    
+
     # Whenever an exception occurs the supplied block is called
     # This is important when Connection::on_message has been used, since
     # failures to the connection would be lost otherwise
-    # 
-    # For details on the supplied parameter when the block is called, 
+    #
+    # For details on the supplied parameter when the block is called,
     # see: http://download.oracle.com/javaee/6/api/javax/jms/JMSException.html
-    # 
+    #
     # Example:
     #   connection.on_exception do |jms_exception|
     #     puts "JMS Exception has occurred: #{jms_exception}"
@@ -408,13 +408,13 @@ module JMS
     def on_exception(&block)
       @jms_connection.setExceptionListener(block)
     end
-    
+
     # Gets the metadata for this connection
     # see: http://download.oracle.com/javaee/6/api/javax/jms/ConnectionMetaData.html
     def meta_data
       @jms_connection.getMetaData
     end
-    
+
     # Return a string describing the JMS provider and version
     def to_s
       md = @jms_connection.getMetaData
@@ -422,7 +422,7 @@ module JMS
     end
 
     # Receive messages in a separate thread when they arrive
-    # 
+    #
     # Allows messages to be recieved in a separate thread. I.e. Asynchronously
     # This method will return to the caller before messages are processed.
     # It is then the callers responsibility to keep the program active so that messages
@@ -434,7 +434,7 @@ module JMS
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
-    #      
+    #
     #  :options => any of the javax.jms.Session constants:
     #     Note: :options are ignored if :transacted => true
     #     javax.jms.Session::AUTO_ACKNOWLEDGE
@@ -474,7 +474,7 @@ module JMS
     #
     #   :selector   => Filter which messages should be returned from the queue
     #                  Default: All messages
-    #                  
+    #
     #   :no_local   => Determine whether messages published by its own connection
     #                  should be delivered to the supplied block
     #                  Default: false
@@ -530,8 +530,8 @@ module JMS
     # multiple threads.
     #
     # Each thread can request a session and then return it once it is no longer
-    # needed by that thread. The only way to get a session is pass a block so that 
-    # the Session is automatically returned to the pool upon completion of the block. 
+    # needed by that thread. The only way to get a session is pass a block so that
+    # the Session is automatically returned to the pool upon completion of the block.
     #
     # Parameters:
     #   see regular session parameters from: JMS::Connection#initialize
@@ -550,7 +550,7 @@ module JMS
     #                      Default: None
     # Example:
     #   session_pool = connection.create_session_pool(config)
-    #   
+    #
     #   session_pool.session do |session|
     #      producer.send(session.message("Hello World"))
     #   end
@@ -558,6 +558,7 @@ module JMS
       require 'jms/session_pool' unless defined? JMS::SessionPool
       JMS::SessionPool.new(self, params)
     end
+
   end
 
 end
