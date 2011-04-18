@@ -90,6 +90,7 @@ topic they are interested in
 Producers write messages to queues or topics
 
 ActiveMQ Example:
+
     require 'rubygems'
     require 'jms'
 
@@ -115,6 +116,7 @@ ActiveMQ Example:
 Consumers read message from a queue or topic
 
 ActiveMQ Example:
+
     require 'rubygems'
     require 'jms'
 
