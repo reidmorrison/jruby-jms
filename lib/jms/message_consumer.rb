@@ -14,7 +14,8 @@
 #  limitations under the License.
 ################################################################################
 
-module javax.jms::MessageConsumer
+# Interface javax.jms.MessageConsumer
+module JMS::MessageConsumer
   # Obtain a message from the Destination or Topic
   # In JMS terms, the message is received from the Destination
   # :timeout follows the rules for MQSeries:
@@ -75,8 +76,9 @@ module javax.jms::MessageConsumer
       duration = Time.now - start_time
       {:messages => message_count,
         :duration => duration,
-        :messages_per_second => (message_count/duration).to_i,
-        :ms_per_msg => (duration*1000.0)/message_count}
+        :messages_per_second => duration > 0 ? (message_count/duration).to_i : 0,
+        :ms_per_msg => message_count > 0 ? (duration*1000.0)/message_count : 0
+      }
     end
   end
 
@@ -101,7 +103,7 @@ module javax.jms::MessageConsumer
   def on_message(params={}, &proc)
     raise "MessageConsumer::on_message requires a code block to be executed for each message received" unless proc
 
-    @listener = JMS::MessageListener.new(params,&proc)
+    @listener = JMS::MessageListenerImpl.new(params,&proc)
     self.setMessageListener @listener
   end
 

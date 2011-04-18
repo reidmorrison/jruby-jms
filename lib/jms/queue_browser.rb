@@ -14,14 +14,15 @@
 #  limitations under the License.
 ################################################################################
 
-module javax.jms::QueueBrowser
+#Interface javax.jms.QueueBrowser
+module JMS::QueueBrowser
   # For each message on the queue call the supplied Proc
-  def each(params={}, &proc)
-    raise "javax.jms.QueueBrowser::each requires a code block to be executed for each message received" unless proc
+  def each(params={}, &block)
+    raise "JMS::QueueBrowser::each requires a code block to be executed for each message received" unless block
 
     e = self.getEnumeration
     while e.hasMoreElements
-      proc.call(e.nextElement)
+      block.call(e.nextElement)
     end
   end
 end

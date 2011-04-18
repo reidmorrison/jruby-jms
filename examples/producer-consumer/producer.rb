@@ -18,7 +18,8 @@ raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless con
 
 JMS::Connection.session(config) do |session|
   session.producer(:queue_name => 'ExampleQueue') do |producer|
-    producer.send(session.message("Hello World"))
+    producer.delivery_mode = JMS::DeliveryMode::NON_PERSISTENT
+    producer.send(session.message("Hello World: #{Time.now}"))
     JMS::logger.info "Successfully sent one message to queue ExampleQueue"
   end
 end

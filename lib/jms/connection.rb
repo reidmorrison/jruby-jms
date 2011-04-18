@@ -70,13 +70,16 @@ module JMS
       end
     end
 
-    # Connect to a JMS Broker, create a session and call the code block passing in the session
+    # Connect to a JMS Broker, create and start the session,
+    # then call the code block passing in the session.
     # Both the Session and Connection are closed on termination of the block
     #
     # Shortcut convenience method to both connect to the broker and create a session
     # Useful when only a single session is required in the current thread
     #
     # Note: It is important that each thread have its own session to support transactions
+    #       This method will also start the session immediately so that any
+    #       consumers using this session will start immediately
     def self.session(params = {}, &proc)
       self.start(params) do |connection|
         connection.session(params, &proc)
@@ -101,7 +104,7 @@ module JMS
     # TODO make this a class method
     def fetch_dependencies(jar_list)
       jar_list.each do |jar|
-        JMS::logger.info "Loading Jar File:#{jar}"
+        JMS::logger.debug "Loading Jar File:#{jar}"
         begin
           require jar
         rescue Exception => exc
@@ -109,15 +112,16 @@ module JMS
         end
       end if jar_list
 
-      require 'jms/message_listener'
-      require 'jms/javax_jms_message'
-      require 'jms/javax_jms_text_message'
-      require 'jms/javax_jms_map_message'
-      require 'jms/javax_jms_bytes_message'
-      require 'jms/javax_jms_object_message'
-      require 'jms/javax_jms_session'
-      require 'jms/javax_jms_message_consumer'
-      require 'jms/javax_jms_queue_browser'
+      require 'jms/imports'
+      require 'jms/message_listener_impl'
+      require 'jms/message'
+      require 'jms/text_message'
+      require 'jms/map_message'
+      require 'jms/bytes_message'
+      require 'jms/object_message'
+      require 'jms/session'
+      require 'jms/message_consumer'
+      require 'jms/queue_browser'
       require 'jms/oracle_a_q_connection_factory'
     end
 
@@ -141,103 +145,42 @@ module JMS
     #   :jndi_context => Mandatory if jndi lookup is being used, contains details
     #                    on how to connect to JNDI server etc.
     #
+    #   :require_jars => An optional array of Jar file names to load for the specified
+    #                    JMS provider. By using this option it is not necessary
+    #                    to put all the JMS Provider specific jar files into the
+    #                    environment variable CLASSPATH prior to starting JRuby
+    #
+    #   :username  => Username to connect to JMS provider with
+    #   :password  => Password to use when to connecting to the JMS provider
+    #                 Note: :password is ignored if :username is not supplied
+    #
     # :factory and :jndi_name are mutually exclusive, both cannot be supplied at the
     # same time. :factory takes precedence over :jndi_name
     #
     # JMS Provider specific properties can be set if the JMS Factory itself
-    # has setters for those properties. Some known examples:
+    # has setters for those properties.
     #
-    #   For HornetQ
-    #    :factory => 'org.hornetq.jms.client.HornetQConnectionFactory',
-    #    :discovery_address => '127.0.0.1',
-    #    :discovery_port => '5445',
-    #    :username => 'guest',
-    #    :password => 'guest'
-    #
-    #   For HornetQ using JNDI lookup technique
-    #    :jndi_name => '/ConnectionFactory',
-    #    :jndi_context => {
-    #      'java.naming.factory.initial' => 'org.jnp.interfaces.NamingContextFactory',
-    #      'java.naming.provider.url' => 'jnp://localhost:1099',
-    #      'java.naming.factory.url.pkgs' => 'org.jboss.naming:org.jnp.interfaces',
-    #      'java.naming.security.principal' => 'guest',
-    #      'java.naming.security.credentials' => 'guest'
-    #    }
-    #
-    #   On Java 6, HornetQ needs the following jar files on your CLASSPATH:
-    #     hornetq-core-client.jar
-    #     netty.jar
-    #     hornetq-jms-client.jar
-    #     jboss-jms-api.jar
-    #     jnp-client.jar
-    #
-    #   On Java 5, HornetQ needs the following jar files on your CLASSPATH:
-    #     hornetq-core-client-java5.jar
-    #     netty.jar
-    #     hornetq-jms-client-java5.jar
-    #     jboss-jms-api.jar
-    #     jnp-client.jar
-    #
-    #   For: WebSphere MQ
-    #    :factory => 'com.ibm.mq.jms.MQQueueConnectionFactory',
-    #    :queue_manager=>'REID',
-    #    :host_name=>'localhost',
-    #    :channel=>'MY.CLIENT.CHL',
-    #    :port=>1414,
-    #    :transport_type => com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP,
-    #    :username => 'mqm'
-    #
-    #   For: Active MQ
-    #    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-    #    :broker_url => 'tcp://localhost:61616'
-    #
-    #   ActiveMQ requires the following jar files on your CLASSPATH
-    #
-    #   For Oracle AQ 9 Server
-    #    :factory => 'JMS::OracleAQConnectionFactory',
-    #    :url => 'jdbc:oracle:thin:@hostname:1521:instanceid',
-    #    :username => 'aquser',
-    #    :password => 'mypassword'
-    #
-    #   For JBoss, which uses JNDI lookup technique
-    #    :jndi_name => 'ConnectionFactory',
-    #    :jndi_context => {
-    #      'java.naming.factory.initial' => 'org.jnp.interfaces.NamingContextFactory',
-    #      'java.naming.provider.url' => 'jnp://localhost:1099'
-    #      'java.naming.security.principal' => 'user',
-    #      'java.naming.security.credentials' => 'pwd'
-    #    }
-    #
-    #   For Apache Qpid / Redhat Messaging, using Factory class directly
-    #    :factory:  org.apache.qpid.client.AMQConnectionFactory
-    #    :broker_url: tcp://localhost:5672
-    #
-    #   For Apache Qpid / Redhat Messaging, via JNDI lookup
-    #    :jndi_name => 'local',
-    #    :jndi_context => {
-    #      'java.naming.factory.initial' => 'org.apache.qpid.jndi.PropertiesFileInitialContextFactory',
-    #      'connectionfactory.local' => "amqp://guest:guest@clientid/testpath?brokerlist='tcp://localhost:5672'"
-    #    }
+    # For some known examples, see: [Example jms.yml](https://github.com/reidmorrison/jruby-jms/blob/master/examples/jms.yml)
     #
     def initialize(params = {})
-      #TODO: Support passing in logging class through params
-      #
       # Used by ::on_message
       @sessions = []
       @consumers = []
 
+      options = params.dup
+
       # Load Jar files on demand so that they do not need to be in the CLASSPATH
       # of JRuby lib directory
-      fetch_dependencies(params[:require_jars])
+      fetch_dependencies(options.delete(:require_jars))
 
       connection_factory = nil
-      factory = params[:factory]
+      factory = options.delete(:factory)
       if factory
         # If factory is a string, then it is the name of a class, not the class itself
         factory = eval(factory) if factory.respond_to? :to_str
         connection_factory = factory.new
-      elsif jndi_name = params[:jndi_name]
-        raise "Missing mandatory parameter :jndi_context missing in call to Connection::connect" unless jndi_context = params[:jndi_context]
+      elsif jndi_name = options[:jndi_name]
+        raise "Missing mandatory parameter :jndi_context missing in call to Connection::connect" unless jndi_context = options[:jndi_context]
         jndi = javax.naming.InitialContext.new(java.util.Hashtable.new(jndi_context))
         begin
           connection_factory = jndi.lookup jndi_name
@@ -247,17 +190,25 @@ module JMS
       else
         raise "Missing mandatory parameter :factory or :jndi_name missing in call to Connection::connect"
       end
+      options.delete(:jndi_name)
+      options.delete(:jndi_context)
 
       JMS::logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
-      params.each_pair do |key, val|
+      options.each_pair do |key, val|
+        next if [:username, :password].include?(key)
+
         method = key.to_s+'='
         if connection_factory.respond_to? method
           connection_factory.send method, val
-          JMS::logger.debug "   #{key} = #{connection_factory.send key}" if connection_factory.respond_to? key.to_sym
+          JMS::logger.debug "   #{key} = #{connection_factory.send key.to_sym}" if connection_factory.respond_to? key.to_sym
+        else
+          JMS::logger.warn "#{connection_factory.java_class} does not understand option: :#{key}=#{val}, ignoring :#{key}" if connection_factory.respond_to? :java_class
         end
       end
-      if params[:username]
-        @jms_connection = connection_factory.create_connection(params[:username], params[:password])
+
+      # Check for username and password
+      if options[:username]
+        @jms_connection = connection_factory.create_connection(options[:username], options[:password])
       else
         @jms_connection = connection_factory.create_connection
       end
@@ -291,23 +242,23 @@ module JMS
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the javax.jms.Session constants:
+    #  :options => any of the JMS::Session constants:
     #     Note: :options are ignored if :transacted => true
-    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
     #        returned from a call to receive or when the message listener the session has
     #        called to process the message successfully returns.
-    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #     JMS::Session::CLIENT_ACKNOWLEDGE
     #        With this acknowledgment mode, the client acknowledges a consumed
     #        message by calling the message's acknowledge method.
-    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #     JMS::Session::DUPS_OK_ACKNOWLEDGE
     #        This acknowledgment mode instructs the session to lazily acknowledge
     #        the delivery of messages.
-    #     javax.jms.Session::SESSION_TRANSACTED
+    #     JMS::Session::SESSION_TRANSACTED
     #        This value is returned from the method getAcknowledgeMode if the
     #        session is transacted.
-    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     Default: JMS::Session::AUTO_ACKNOWLEDGE
     #
     def session(params={}, &proc)
       raise "Missing mandatory Block when calling JMS::Connection#session" unless proc
@@ -333,27 +284,27 @@ module JMS
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the javax.jms.Session constants:
+    #  :options => any of the JMS::Session constants:
     #     Note: :options are ignored if :transacted => true
-    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
     #        returned from a call to receive or when the message listener the session has
     #        called to process the message successfully returns.
-    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #     JMS::Session::CLIENT_ACKNOWLEDGE
     #        With this acknowledgment mode, the client acknowledges a consumed
     #        message by calling the message's acknowledge method.
-    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #     JMS::Session::DUPS_OK_ACKNOWLEDGE
     #        This acknowledgment mode instructs the session to lazily acknowledge
     #        the delivery of messages.
-    #     javax.jms.Session::SESSION_TRANSACTED
+    #     JMS::Session::SESSION_TRANSACTED
     #        This value is returned from the method getAcknowledgeMode if the
     #        session is transacted.
-    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     Default: JMS::Session::AUTO_ACKNOWLEDGE
     #
     def create_session(params={})
       transacted = params[:transacted] || false
-      options = params[:options] || javax.jms.Session::AUTO_ACKNOWLEDGE
+      options = params[:options] || JMS::Session::AUTO_ACKNOWLEDGE
       @jms_connection.create_session(transacted, options)
     end
 
@@ -380,7 +331,7 @@ module JMS
     end
 
     # Returns the ExceptionListener object for this connection
-    # Returned class implements interface javax.jms.ExceptionListener
+    # Returned class implements interface JMS::ExceptionListener
     def exception_listener
       @jms_connection.getExceptionListener
     end
@@ -423,7 +374,7 @@ module JMS
 
     # Receive messages in a separate thread when they arrive
     #
-    # Allows messages to be recieved in a separate thread. I.e. Asynchronously
+    # Allows messages to be received Asynchronously in a separate thread.
     # This method will return to the caller before messages are processed.
     # It is then the callers responsibility to keep the program active so that messages
     # can then be processed.
@@ -435,27 +386,27 @@ module JMS
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the javax.jms.Session constants:
+    #  :options => any of the JMS::Session constants:
     #     Note: :options are ignored if :transacted => true
-    #     javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
     #        returned from a call to receive or when the message listener the session has
     #        called to process the message successfully returns.
-    #     javax.jms.Session::CLIENT_ACKNOWLEDGE
+    #     JMS::Session::CLIENT_ACKNOWLEDGE
     #        With this acknowledgment mode, the client acknowledges a consumed
     #        message by calling the message's acknowledge method.
-    #     javax.jms.Session::DUPS_OK_ACKNOWLEDGE
+    #     JMS::Session::DUPS_OK_ACKNOWLEDGE
     #        This acknowledgment mode instructs the session to lazily acknowledge
     #        the delivery of messages.
-    #     javax.jms.Session::SESSION_TRANSACTED
+    #     JMS::Session::SESSION_TRANSACTED
     #        This value is returned from the method getAcknowledgeMode if the
     #        session is transacted.
-    #     Default: javax.jms.Session::AUTO_ACKNOWLEDGE
+    #     Default: JMS::Session::AUTO_ACKNOWLEDGE
     #
     #   :session_count : Number of sessions to create, each with their own consumer which
-    #                    in turn will call the supplied Proc.
-    #                    Note: The supplied Proc must be thread safe since it will be called
+    #                    in turn will call the supplied code block.
+    #                    Note: The supplied block must be thread safe since it will be called
     #                          by several threads at the same time.
     #                          I.e. Don't change instance variables etc. without the
     #                          necessary semaphores etc.
@@ -496,7 +447,7 @@ module JMS
     # Note: Separately invoke Connection#on_exception so that connection failures can be handled
     #       since on_message will Not be called if the connection is lost
     #
-    def on_message(params, &proc)
+    def on_message(params, &block)
       raise "JMS::Connection must be connected prior to calling JMS::Connection::on_message" unless @sessions && @consumers
 
       consumer_count = params[:session_count] || 1
@@ -506,22 +457,26 @@ module JMS
         if session.transacted?
           consumer.on_message(params) do |message|
             begin
-              proc.call(message) ? session.commit : session.rollback
+              block.call(message) ? session.commit : session.rollback
             rescue => exc
               session.rollback
               throw exc
             end
           end
         else
-          consumer.on_message(params, &proc)
+          consumer.on_message(params, &block)
         end
         @consumers << consumer
         @sessions << session
       end
     end
 
+    # Return the statistics for every active Connection#on_message consumer
+    # in an Array
+    #
+    # For details on the contents of each element in the array, see: Consumer#on_message_statistics
     def on_message_statistics
-      @consumers.collect{|consumer| consumer.on_message_statistics}
+      @consumers.collect { |consumer| consumer.on_message_statistics }
     end
 
     # Since a Session can only be used by one thread at a time, we could create
@@ -530,7 +485,7 @@ module JMS
     # multiple threads.
     #
     # Each thread can request a session and then return it once it is no longer
-    # needed by that thread. The only way to get a session is pass a block so that
+    # needed by that thread. The only way to get a session is to pass a block so that
     # the Session is automatically returned to the pool upon completion of the block.
     #
     # Parameters:

@@ -15,7 +15,7 @@
 ################################################################################
 
 #Interface javax.jms.ObjectMessage
-module javax.jms::ObjectMessage
+module JMS::ObjectMessage
   def data
     getObject
   end

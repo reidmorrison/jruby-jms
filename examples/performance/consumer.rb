@@ -1,5 +1,5 @@
 #
-# Sample Consumer: 
+# Sample Consumer:
 #   Retrieve all messages from a queue
 #
 
@@ -17,11 +17,9 @@ config = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'jms.yml'))[jms_
 raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless config
 
 JMS::Connection.session(config) do |session|
-  session.consumer(:queue_name => 'SampleQueue') do |consumer|
-    stats = consumer.each(:statistics => true) do |message|
-      puts "=================================="
-      p message
-    end
-    puts "STATISTICS :" + stats.inspect
+  stats = session.consume(:queue_name => 'ExampleQueue', :statistics => true) do |message|
+      # Do nothing in this example with each message
   end
+
+  JMS::logger.info "Consumed #{stats[:messages]} messages. Average #{stats[:ms_per_msg]}ms per message"
 end

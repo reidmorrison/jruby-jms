@@ -1,4 +1,4 @@
-## 0.11.0 (2011-04-06)
+## 0.11.0 (2011-04-18)
 
 * Compatibility with JRuby 1.6
 * I hate doing this, but unfortunately there is a small breaking change in this release:
@@ -9,6 +9,9 @@
 *** jms_delivery_mode_sym
 *** jms_delivery_mode_sym=
 * Added Session Pool - requires GenePool as a dependency if used
+* Generate warning log entry for any parameters not known to the ConnectionFactory
+* Use java_import for all javax.jms classes
+** Rename all Java source files to match new names
 
 ## 0.10.1 (2011-02-21)
 

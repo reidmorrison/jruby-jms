@@ -17,13 +17,13 @@
 # For each thread that will be processing messages concurrently a separate
 # session is required. All sessions can share a single connection to the same
 # JMS Provider.
-# 
+#
 # Interface javax.jms.Session
-# 
+#
 # See: http://download.oracle.com/javaee/6/api/javax/jms/Session.html
-# 
+#
 # Other methods still directly accessible through this class:
-# 
+#
 # create_browser(queue, message_selector)
 #   Creates a QueueBrowser object to peek at the messages on the specified queue using a message selector.
 #
@@ -32,9 +32,9 @@
 #
 # create_consumer(destination)
 #   Creates a MessageConsumer for the specified destination
-#   See: Connection::consumer 
-#   
-#   Example: 
+#   See: Connection::consumer
+#
+#   Example:
 #      destination = session.create_destination(:queue_name => "MyQueue")
 #      session.create_consumer(destination)
 #
@@ -49,7 +49,7 @@
 #
 # create_durable_subscriber(Topic topic, java.lang.String name, java.lang.String messageSelector, boolean noLocal)
 #   Creates a durable subscriber to the specified topic, using a message selector and specifying whether messages published by its own connection should be delivered to it.
-#   
+#
 #	create_map_Message()
 #   Creates a MapMessage object
 #
@@ -107,7 +107,8 @@
 # unsubscribe(name)
 #   Unsubscribes a durable subscription that has been created by a client
 #
-module javax.jms::Session
+# Interface javax.jms.Session
+module JMS::Session
   # Create a new message instance based on the type of the data being supplied
   #   String (:to_str)    => TextMessage
   #   Hash   (:each_pair) => MapMessage
@@ -129,13 +130,13 @@ module javax.jms::Session
   end
 
   # Create the destination based on the parameter supplied
-  # 
+  #
   # The idea behind this method is to allow the decision as to whether
   # one is sending to a topic or destination to be transparent to the code.
   # The supplied parameters can be externalized into say a YAML file
   # so that today it writes to a queue, later it can be changed to write
   # to a topic so that multiple parties can receive the same messages.
-  # 
+  #
   # Note: For Temporary Queues and Topics, remember to delete them when done
   #       or just use ::destination instead with a block and it will take care
   #       of deleting them for you
@@ -167,9 +168,9 @@ module javax.jms::Session
   #
   # Returns the result of the supplied block
   def create_destination(params)
-    # Allow a Java JMS destination object to be passed in 
-    return params[:destination] if params[:destination] && params[:destination].java_kind_of?(javax.jms::Destination)
-    
+    # Allow a Java JMS destination object to be passed in
+    return params[:destination] if params[:destination] && params[:destination].java_kind_of?(JMS::Destination)
+
     # :q_name is deprecated
     queue_name = params[:queue_name] || params[:q_name]
     topic_name = params[:topic_name]
@@ -181,9 +182,9 @@ module javax.jms::Session
       topic_name == :temporary ? create_temporary_topic : create_topic(topic_name)
     end
   end
-  
+
   # Create a queue or topic to send or receive messages from
-  # 
+  #
   # A block must be supplied so that if it is a temporary topic or queue
   # it will be deleted after the proc is complete
   #
@@ -223,7 +224,7 @@ module javax.jms::Session
       # Delete Temporary Queue / Topic
       dest.delete if dest && dest.respond_to?(:delete)
     end
-  end  
+  end
 
   # Return the queue matching the queue name supplied
   # Call the Proc if supplied
@@ -291,7 +292,7 @@ module javax.jms::Session
   #                  Symbol: :temporary => Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit javax.jms::Destination to use
+  #   :destination=> Explicit JMS::Destination to use
   def producer(params, &proc)
     p = self.create_producer(self.create_destination(params))
     if proc

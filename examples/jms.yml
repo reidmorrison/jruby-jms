@@ -10,9 +10,9 @@
 # Active MQ Centralized Broker
 activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
-  :broker_url: tcp://localhost:61616
+  :broker_url: tcp://127.0.0.1:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
+    - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
 # ActiveMQ 5.5 Requires additional jar files
 #    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
 #    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
@@ -24,14 +24,14 @@ activemq-vm:
   :broker_url: vm://127.0.0.1
   :object_message_serialization_defered: true
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
+    - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
 
 # ActiveMQ with failover to slave instance
 activemq-ha:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
-  :broker_url: failover://(tcp://127.0.0.1:61616,tcp://192.168.0.23:61616)?randomize=false&timeout=30000&initialReconnectDelay=100&useExponentialBackOff=true
+  :broker_url: failover://(tcp://msg1:61616,tcp://msg2:61616)?randomize=false&timeout=30000&initialReconnectDelay=100&useExponentialBackOff=true
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2-fuse-02-00/activemq-all-5.4.2-fuse-02-00.jar
+    - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
 
 # JBoss 4 Messaging
   :jndi_name: ConnectionFactory
@@ -40,6 +40,12 @@ activemq-ha:
     java.naming.provider.url: jnp://localhost:1099
     java.naming.security.principal: user
     java.naming.security.credentials: pwd
+  :require_jars:
+    - ~/Applications/jboss-messaging-client/1.4.0.SP3/javassist.jar
+    - ~/Applications/jboss-messaging-client/1.4.0.SP3/jboss-aop-jdk50.jar
+    - ~/Applications/jboss-messaging-client/1.4.0.SP3/jboss-messaging-client.jar
+    - ~/Applications/jboss-messaging-client/1.4.0.SP3/jbossall-client.jar
+    - ~/Applications/jboss-messaging-client/1.4.0.SP3/trove.jar
 
 # Apache Qpid
 qpid:
@@ -47,6 +53,17 @@ qpid:
   :jndi_context:
     java.naming.factory.initial: org.apache.qpid.jndi.PropertiesFileInitialContextFactory
     connectionfactory.local: amqp://guest:guest@clientid/testpath?brokerlist='tcp://localhost:5672'
+  :require_jars:
+    - ~/Applications/javax.jms.jar
+    - ~/Applications/qpid-0.8/lib/backport-util-concurrent-2.2.jar
+    - ~/Applications/qpid-0.8/lib/commons-collections-3.2.jar
+    - ~/Applications/qpid-0.8/lib/commons-lang-2.2.jar
+    - ~/Applications/qpid-0.8/lib/mina-core-1.0.1.jar
+    - ~/Applications/qpid-0.8/lib/qpid-client-0.8.jar
+    - ~/Applications/qpid-0.8/lib/qpid-common-0.8.jar
+    - ~/Applications/qpid-0.8/lib/slf4j-api-1.6.1.jar
+    - ~/Applications/qpid-0.8/lib/log4j-1.2.12.jar
+    - ~/Applications/qpid-0.8/lib/slf4j-log4j12-1.6.1.jar
 
 # HornetQ Broker
 hornetq:
@@ -59,21 +76,22 @@ hornetq:
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
   :require_jars:
-    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-core-client.jar
-    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-core.jar
-    - ~/Applications/hornetq-2.1.2.Final/lib/hornetq-jms-client.jar
-    - ~/Applications/hornetq-2.1.2.Final/lib/jboss-jms-api.jar
-    - ~/Applications/hornetq-2.1.2.Final/lib/jnp-client.jar
-    - ~/Applications/hornetq-2.1.2.Final/lib/netty.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/jnp-client.jar
+    - ~/Applications/hornetq-2.2.2.Final/lib/netty.jar
 
-# WebSphere MQ
+# IBM WebSphere MQ
 wmq:
   :factory: com.ibm.mq.jms.MQQueueConnectionFactory
   :queue_manager: LOCAL
   :host_name: localhost
   :channel: MY.CLIENT.CHL
   :port: 1414
-  :transport_type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
   :username: mqm
   :require_jars:
     - /opt/mqm/lib/com.ibm.mqjms.jar

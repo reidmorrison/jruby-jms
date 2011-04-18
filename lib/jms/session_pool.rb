@@ -7,8 +7,8 @@ module JMS
   # multiple threads.
   #
   # Each thread can request a session and then return it once it is no longer
-  # needed by that thread. The only way to get a session is pass a block so that 
-  # the Session is automatically returned to the pool upon completion of the block. 
+  # needed by that thread. The only way to get a session is pass a block so that
+  # the Session is automatically returned to the pool upon completion of the block.
   #
   # Parameters:
   #   see regular session parameters from: JMS::Connection#initialize
@@ -44,7 +44,7 @@ module JMS
         :logger       => logger) do
         connection.create_session(session_params)
       end
-      
+
       # Handle connection failures
       connection.on_exception do |jms_exception|
         logger.error "JMS Connection Exception has occurred: #{jms_exception}"
@@ -60,11 +60,11 @@ module JMS
       #TODO Catch connection failures and release from pool?
     end
 
-    # Obtain a session from the pool and create a MessageConsumer. 
-    # Pass both into the supplied block. 
+    # Obtain a session from the pool and create a MessageConsumer.
+    # Pass both into the supplied block.
     # Once the block is complete the consumer is closed and the session is
     # returned to the pool.
-    # 
+    #
     # Parameters:
     #   :queue_name => String: Name of the Queue to return
     #                  Symbol: :temporary => Create temporary queue
@@ -98,12 +98,12 @@ module JMS
         end
       end
     end
-      
-    # Obtain a session from the pool and create a MessageProducer. 
-    # Pass both into the supplied block. 
+
+    # Obtain a session from the pool and create a MessageProducer.
+    # Pass both into the supplied block.
     # Once the block is complete the producer is closed and the session is
     # returned to the pool.
-    # 
+    #
     # Parameters:
     #   :queue_name => String: Name of the Queue to send messages to
     #                  Symbol: :temporary => Create temporary queue
@@ -113,7 +113,7 @@ module JMS
     #                  Symbol: :temporary => Create temporary topic
     #                  Mandatory unless :queue_name is supplied
     #     Or,
-    #   :destination=> Explicit javax.jms::Destination to use
+    #   :destination=> Explicit JMS::Destination to use
     #
     # Example
     #   session_pool.producer(:queue_name => 'ExampleQueue') do |session, producer|
@@ -130,10 +130,10 @@ module JMS
         end
       end
     end
-      
+
     # Immediately Close all sessions in the pool and release from the pool
-    # 
-    # TODO: Allow an option to wait for active sessions to be returned before 
+    #
+    # TODO: Allow an option to wait for active sessions to be returned before
     #       closing
     def close
       @pool.each do |s|
@@ -142,7 +142,7 @@ module JMS
         #@pool.remove(s)
       end
     end
-      
+
   end
 
 end

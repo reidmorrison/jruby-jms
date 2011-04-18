@@ -15,11 +15,11 @@
 ################################################################################
 
 module JMS
-  
+
   private
   # For internal use only by JMS::Connection
-  class MessageListener
-    include javax.jms::MessageListener
+  class MessageListenerImpl
+    include JMS::MessageListener
 
     # Parameters:
     #   :statistics Capture statistics on how many messages have been read
