@@ -47,7 +47,7 @@ module JMS
 
       # Handle connection failures
       connection.on_exception do |jms_exception|
-        logger.error "JMS Connection Exception has occurred: #{jms_exception}"
+        logger.error "JMS Connection Exception has occurred: #{jms_exception}" if logger
         #TODO: Close all sessions in the pool and release from the pool?
       end
     end
