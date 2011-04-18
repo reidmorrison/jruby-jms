@@ -11,6 +11,8 @@
 activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://127.0.0.1:61616
+  :username: system
+  :password: manager
   :require_jars:
     - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
 # ActiveMQ 5.5 Requires additional jar files
