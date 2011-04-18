@@ -171,7 +171,7 @@ module JMS::Message
       getJMSTimestamp
     end
 
-    # Set the Message reply to Destination
+    # Set the Message timestamp as Java Timestamp Integer
     #   timestamp: Must be an Java Timestamp Integer
     #TODO Support Ruby Time
     def jms_timestamp=(timestamp)
