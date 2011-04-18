@@ -4,26 +4,16 @@
 
 ### Current Activities & Backward Compatibility
 
-Please read the documentation in the source files for now. Currently looking
-into the rdoc doc generation issue for JRuby extended Java interfaces and classes.
+The API is relatively stable at this point and I do not expect any breaking
+changes at this point.
 
-There may still be some changes to the API to make things better and/or simpler.
+There may still be some minor changes to the API to make things better and/or simpler.
 Once the code goes to V1.0.0 I will make every effort to not break the
 existing interface in any way.
 
 ### Feedback is welcome and appreciated :)
 
-### Todo
-
-* Need to get rdoc working
-* More tests, especially pub/sub
-
 ### Introduction
-
-jruby-jms has been around in my toolbox since 2008. Since I was not an expert
-in JMS I have held off releasing to the wild. I believe it is now of sufficient
-quality and usefulness to release into the wild. In fact it has been used
-in production at an enterprise site for 2 years now.
 
 jruby-jms attempts to "rubify" the Java JMS API without
 compromising performance. It does this by sprinkling "Ruby-goodness" into the
@@ -36,6 +26,9 @@ In this way, using regular Ruby constructs a Ruby program can easily
 interact with JMS in a highly performant way. Also, in this way you are not
 limited to whatever the Ruby wrapper would have exposed, since the entire JMS
 API is available to you at any time.
+
+The initial internal use version of JRuby-JMS was created in 2008. It has been
+in use in production since 2009.
 
 ### Install
 
@@ -140,8 +133,8 @@ ActiveMQ Example:
 
 ## Overview
 
-jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS)
-followed by many JMS Providers.
+jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS) V1.1
+followed by several JMS Providers.
 
 ## Threading
 
@@ -172,7 +165,7 @@ required in the Ruby code:
 
 ### JRuby
 
-jruby-jms has been tested against JRuby 1.5.1 and 1.6, but should work with any
+jruby-jms has been tested against JRuby 1.5.1 and 1.6.1, but should work with any
 current JRuby version.
 
 ## Development

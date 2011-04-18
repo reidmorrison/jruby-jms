@@ -31,3 +31,9 @@ task :test do
 
   Rake::Task['functional'].invoke
 end
+
+desc "Generate RDOC documentation"
+task :doc do
+  system "rdoc --main README.md --inline-source --quiet README.md `find lib -name '*.rb'`"
+end
+
