@@ -13,6 +13,12 @@ begin
       Java::JavaxJms::Session.instance_method(:consume).bind(self).call(params, &proc)
     end
   end
+  
+  class com.ibm.mq.jms::MQQueueBrowser
+    def each(params, &proc)
+      Java::ComIbmMsgClientJms::JmsQueueBrowser.instance_method(:each).bind(self).call(params, &proc)
+    end
+  end
 
   class com.ibm.mq.jms::MQQueueReceiver
     def each(params, &proc)
