@@ -69,7 +69,6 @@ class JMSTest < Test::Unit::TestCase
     should 'support setting persistence using symbols and the java constants' do
       JMS::Connection.session(@config) do |session|
         message = session.message('Hello World')
-        assert_equal message.jms_delivery_mode_sym, :non_persistent
         message.jms_delivery_mode_sym = :non_persistent
         assert_equal message.jms_delivery_mode_sym, :non_persistent
         message.jms_delivery_mode_sym = :persistent
