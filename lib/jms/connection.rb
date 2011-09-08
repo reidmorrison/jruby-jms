@@ -121,6 +121,7 @@ module JMS
       require 'jms/object_message'
       require 'jms/session'
       require 'jms/message_consumer'
+      require 'jms/message_producer'
       require 'jms/queue_browser'
       require 'jms/oracle_a_q_connection_factory'
     end

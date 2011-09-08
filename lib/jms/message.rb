@@ -225,8 +225,8 @@ module JMS::Message
   def attributes
     {
       :jms_correlation_id => jms_correlation_id,
-      :jms_delivery_mode => jms_delivery_mode_sym,
-      :jms_destination => jms_destination,
+      :jms_delivery_mode_sym => jms_delivery_mode_sym,
+      :jms_destination => jms_destination.nil? ? nil : jms_destination.to_string,
       :jms_expiration => jms_expiration,
       :jms_message_id => jms_message_id,
       :jms_priority => jms_priority,

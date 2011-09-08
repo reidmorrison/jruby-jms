@@ -24,7 +24,7 @@ module JMS
   #                      Default: 5.0
   #   :pool_logger       Supply a logger that responds to #debug, #info, #warn and #debug?
   #                      For example: Rails.logger
-  #                      Default: None
+  #                      Default: JMS.logger
   # Example:
   #   session_pool = connection.create_session_pool(config)
   #   session_pool.session do |session|
@@ -35,7 +35,7 @@ module JMS
       # Save Session params since it will be used every time a new session is
       # created in the pool
       session_params = params.nil? ? {} : params.dup
-      logger = session_params[:pool_logger]
+      logger = session_params[:pool_logger] || JMS.logger
       # Define how GenePool can create new sessions
       @pool = GenePool.new(
         :name => session_params[:pool_name] || self.class.name,
@@ -54,10 +54,22 @@ module JMS
 
     # Obtain a session from the pool and pass it to the supplied block
     # The session is automatically returned to the pool once the block completes
+    #
+    # In the event a JMS Exception is thrown the session will be closed and removed
+    # from the pool to prevent re-using sessions that are no longer valid
     def session(&block)
-      #TODO Check if session is open?
-      @pool.with_connection &block
-      #TODO Catch connection failures and release from pool?
+      s = nil
+      begin
+        s = @pool.checkout
+        block.call(s)
+      rescue javax.jms.JMSException => e
+        s.close rescue nil
+        @pool.remove(s)
+        s = nil # Do not check back in since we have removed it
+        raise e
+      ensure
+        @pool.checkin(s) if s
+      end
     end
 
     # Obtain a session from the pool and create a MessageConsumer.
@@ -133,13 +145,16 @@ module JMS
 
     # Immediately Close all sessions in the pool and release from the pool
     #
+    # Note: This is an immediate close, active sessions will be aborted
+    #
+    # Note: Once closed a session pool cannot be re-used. A new instance must
+    #       be created
+    #
     # TODO: Allow an option to wait for active sessions to be returned before
     #       closing
     def close
       @pool.each do |s|
-        #@pool.remove(s)
         s.close
-        #@pool.remove(s)
       end
     end
 
