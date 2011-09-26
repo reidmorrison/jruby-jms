@@ -7,6 +7,9 @@ require 'shoulda'
 require 'jms'
 require 'yaml'
 
+# Set Log4J properties file so that it does not need to be in the CLASSPATH
+java.lang.System.properties['log4j.configuration'] = "test/log4j.properties"
+
 class JMSTest < Test::Unit::TestCase
   context 'JMS Connection' do
     # Load configuration from jms.yml

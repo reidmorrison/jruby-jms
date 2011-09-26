@@ -115,16 +115,34 @@ module JMS::Session
   # Duck typing is used to determine the type. If the class responds
   # to :to_str then it is considered a String. Similarly if it responds to
   # :each_pair it is considered to be a Hash
-  def message(data)
+  #
+  # If automated duck typing is not desired, the type of the message can be specified
+  # by setting the parameter 'type' to any one of:
+  #    :text   => Creates a Text Message
+  #    :map    => Creates a Map Message
+  #    :bytes  => Creates a Bytes Message
+  def message(data, type=nil)
     jms_message = nil
-    if data.respond_to?(:to_str, false)
-      jms_message = self.createTextMessage
-      jms_message.text = data.to_str
+    type ||= if data.respond_to?(:to_str, false)
+      :text
     elsif data.respond_to?(:each_pair, false)
-      jms_message = self.createMapMessage
-      jms_message.data = data
+      :map
     else
       raise "Unknown data type #{data.class.to_s} in Message"
+    end
+
+    case type
+    when :text
+      jms_message = self.createTextMessage
+      jms_message.text = data.to_str
+    when :map
+      jms_message = self.createMapMessage
+      jms_message.data = data
+    when :bytes
+      jms_message = self.createBytesMessage
+      jms_message.write_bytes(data.to_java_bytes)
+    else
+      raise "Invalid type #{type} requested"
     end
     jms_message
   end
@@ -147,11 +165,17 @@ module JMS::Session
   # To create a temporary queue:
   #   session.create_destination(:queue_name => :temporary)
   #
+  # To create a queue:
+  #   session.create_destination('queue://queue_name')
+  #
   # To create a topic:
   #   session.create_destination(:topic_name => 'name of queue')
   #
   # To create a temporary topic:
   #   session.create_destination(:topic_name => :temporary)
+  #
+  # To create a topic:
+  #   session.create_destination('topic://topic_name')
   #
   # Create the destination based on the parameter supplied
   #
@@ -171,9 +195,18 @@ module JMS::Session
     # Allow a Java JMS destination object to be passed in
     return params[:destination] if params[:destination] && params[:destination].java_kind_of?(JMS::Destination)
 
-    # :q_name is deprecated
-    queue_name = params[:queue_name] || params[:q_name]
-    topic_name = params[:topic_name]
+    queue_name = nil
+    topic_name = nil
+
+    if params.is_a? String
+      queue_name = params['queue://'.length..-1] if params.start_with?('queue://')
+      topic_name = params['topic://'.length..-1] if params.start_with?('topic://')
+    else
+      # :q_name is deprecated
+      queue_name = params[:queue_name] || params[:q_name]
+      topic_name = params[:topic_name]
+    end
+
     raise "Missing mandatory parameter :queue_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
 
     if queue_name

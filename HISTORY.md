@@ -1,3 +1,13 @@
+## 0.11.2 (2011-06-01)
+
+* Issue #8 Add ability to set Producer delivery mode using a Symbol
+* Include ActiveMQ InVM working example along with Log4J properties file
+
+## 0.11.1 (2011-05-25)
+
+* Fixes the condition where a bad session keeps being re-used in a session pool.
+  It is now removed from the pool anytime a JMS exception has occurred
+
 ## 0.11.0 (2011-04-18)
 
 * Compatibility with JRuby 1.6

@@ -13,7 +13,9 @@ activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
+    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
 

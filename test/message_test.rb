@@ -31,7 +31,7 @@ class JMSTest < Test::Unit::TestCase
           producer.send(session.message('Hello World'))
 
           # Consume Message
-          session.consume(:destination => producer.destination) do |message|
+          session.consume(:destination => producer.destination, :timeout=>1000) do |message|
             assert_equal message.java_kind_of?(JMS::TextMessage), true
             data = message.data
           end
@@ -44,7 +44,7 @@ class JMSTest < Test::Unit::TestCase
       JMS::Connection.session(@config) do |session|
         assert_not_nil session
         data = :timed_out
-        browse_data = nil
+        browse_data = :timed_out
         session.producer(:queue_name => @queue_name) do |producer|
           # Send Message
           producer.send(session.message('Hello World'))
@@ -56,7 +56,7 @@ class JMSTest < Test::Unit::TestCase
           end
 
           # Consume Message
-          session.consume(:queue_name => @queue_name, :timeout => 1000) do |message|
+          session.consume(:queue_name => @queue_name, :timeout=>1000) do |message|
             assert_equal message.java_kind_of?(JMS::TextMessage), true
             data = message.data
           end
@@ -90,7 +90,7 @@ class JMSTest < Test::Unit::TestCase
           producer.send(message)
 
           # Consume Message
-          session.consume(:destination => producer.destination) do |message|
+          session.consume(:destination => producer.destination, :timeout=>1000) do |message|
             assert_equal message.java_kind_of?(JMS::TextMessage), true
             data = message.data
             #assert_equal :non_persistent, message.jms_delivery_mode
@@ -115,7 +115,7 @@ class JMSTest < Test::Unit::TestCase
           producer.send(message)
 
           # Consume Message
-          session.consume(:destination => producer.destination, :timeout => 1000) do |message|
+          session.consume(:destination => producer.destination, :timeout=>1000) do |message|
             assert_equal message.java_kind_of?(JMS::TextMessage), true
             data = message.data
             assert_equal :persistent, message.jms_delivery_mode_sym
