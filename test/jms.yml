@@ -7,13 +7,17 @@
 #
 ---
 # Which JMS Provider to use by default
-default: activemq
+#default: webspheremq
+default: hornetq
+#default: activemq
 
 activemq:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.4.2-fuse-03-09/activemq-all-5.4.2-fuse-03-09.jar
+    - ~/mydoc/pers/0-projects-open/jms/apache-activemq-5.5.0/activemq-all-5.5.0.jar
+    - ~/mydoc/pers/0-projects-open/jms/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/mydoc/pers/0-projects-open/jms/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
 
@@ -27,11 +31,49 @@ hornetq:
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
   :require_jars:
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jnp-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/netty.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/hornetq-core.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/jnp-client.jar
+    - ~/mydoc/pers/0-projects-open/jms/hornetq-2.2.2.Final/lib/netty.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+webspheremq:
+  #:factory: com.ibm.mq.jms.MQQueueConnectionFactory
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  :host_name: 127.0.0.1
+  #:host_name: 172.16.224.130
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ../mine/lib/com.ibm.mqjms.jar
+    - ../mine/lib/jms.jar
+    - ../mine/lib/com.ibm.mq.jmqi.jar
+    - ../mine/lib/dhbcore.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+  
+webspheremq6:
+  #:factory: com.ibm.mq.jms.MQQueueConnectionFactory
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  #:host_name: 127.0.0.1
+  :host_name: 10.1.132.68
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ../mine/lib6/com.ibm.mqjms.jar
+    #- ../mine/lib6/jms.jar
+    #- ../mine/lib6/com.ibm.mq.jmqi.jar
+    #- ../mine/lib6/dhbcore.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
