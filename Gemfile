@@ -1,3 +1,4 @@
+source :rubygems
 gem 'rake'
 gem 'gene_pool'
 
