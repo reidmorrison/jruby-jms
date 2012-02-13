@@ -7,19 +7,32 @@
 #
 ---
 # Which JMS Provider to use by default
-default: activemq
+#default: hornetq222
+#default: hornetq225
+#default: activemq543
+default: activemq551
+#default: webspheremq6
+#default: webspheremq7
 
-activemq:
+activemq543:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: tcp://localhost:61616
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    - ~/jms/apache-activemq-5.4.3/activemq-all-5.4.3.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
 
-hornetq:
+activemq551:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - ~/jms/apache-activemq-5.5.1/activemq-all-5.5.1.jar
+    - ~/jms/apache-activemq-5.5.1/lib/optional/slf4j-log4j12-1.5.11.jar
+    - ~/jms/apache-activemq-5.5.1/lib/optional/log4j-1.2.14.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+hornetq225:
   # Connect to a local HornetQ Broker using JNDI
   :jndi_name: /ConnectionFactory
   :jndi_context:
@@ -29,11 +42,59 @@ hornetq:
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
   :require_jars:
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jnp-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/netty.jar
+    - ~/jms/hornetq-2.2.5.Final/lib/hornetq-core-client.jar
+    - ~/jms/hornetq-2.2.5.Final/lib/netty.jar
+    - ~/jms/hornetq-2.2.5.Final/lib/hornetq-jms-client.jar
+    - ~/jms/hornetq-2.2.5.Final/lib/jboss-jms-api.jar
+    - ~/jms/hornetq-2.2.5.Final/lib/jnp-client.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+hornetq222:
+  # Connect to a local HornetQ Broker using JNDI
+  :jndi_name: /ConnectionFactory
+  :jndi_context:
+    java.naming.factory.initial: org.jnp.interfaces.NamingContextFactory
+    java.naming.provider.url: jnp://localhost:1099
+    java.naming.factory.url.pkgs: org.jboss.naming:org.jnp.interfaces
+    java.naming.security.principal: guest
+    java.naming.security.credentials: guest
+  :require_jars:
+    - ~/jms/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/netty.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
+    - ~/jms/hornetq-2.2.2.Final/lib/jnp-client.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+webspheremq7:
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  :host_name: 127.0.0.1
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ~/jms/libs-ibmqm7/com.ibm.mqjms.jar
+    - ~/jms/libs-ibmqm7/jms.jar
+    - ~/jms/libs-ibmqm7/com.ibm.mq.jmqi.jar
+    - ~/jms/libs-ibmqm7/dhbcore.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+webspheremq6:
+  :factory: com.ibm.mq.jms.MQConnectionFactory
+  :queue_manager: MYQM
+  :host_name: 127.0.0.1
+  :channel: SRVCONCHA
+  :port: 61414
+  # Transport Type: com.ibm.mq.jms.JMSC::MQJMS_TP_CLIENT_MQ_TCPIP
+  :transport_type: 1
+  :username: mqm
+  :require_jars:
+    - ~/jms/libs-ibmqm6/com.ibm.mqjms.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
