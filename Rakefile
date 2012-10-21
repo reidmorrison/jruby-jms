@@ -1,17 +1,21 @@
+lib = File.expand_path('../lib/', __FILE__)
+$:.unshift lib unless $:.include?(lib)
+
 raise "jruby-jms must be built with JRuby: try again with `jruby -S rake'" unless defined?(JRUBY_VERSION)
 
 require 'rake/clean'
 require 'rake/testtask'
 require 'date'
 require 'java'
+require 'jms/version'
 
 desc "Build gem"
 task :gem  do |t|
   gemspec = Gem::Specification.new do |s|
     s.name = 'jruby-jms'
-    s.version = '0.11.2'
+    s.version = JMS::VERSION
     s.author = 'Reid Morrison'
-    s.email = 'rubywmq@gmail.com'
+    s.email = 'reidmo@gmail.com'
     s.homepage = 'https://github.com/reidmorrison/jruby-jms'
     s.date = Date.today.to_s
     s.description = 'JRuby-JMS is a Java and Ruby library that exposes the Java JMS API in a ruby friendly way. For JRuby only.'

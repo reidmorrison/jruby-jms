@@ -11,7 +11,8 @@
 #default: hornetq222
 #default: hornetq225
 #default: activemq543
-default: activemq551
+#default: activemq551
+default: activemq570
 #default: webspheremq6
 #default: webspheremq7
 
@@ -30,6 +31,15 @@ activemq551:
     - ~/jms/apache-activemq-5.5.1/activemq-all-5.5.1.jar
     - ~/jms/apache-activemq-5.5.1/lib/optional/slf4j-log4j12-1.5.11.jar
     - ~/jms/apache-activemq-5.5.1/lib/optional/log4j-1.2.14.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
+
+activemq570:
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - ~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar
+    - ~/Applications/apache-activemq-5.7.0/lib/optional/log4j-1.2.17.jar
   :queue_name: TestQueue
   :topic_name: TestTopic
 

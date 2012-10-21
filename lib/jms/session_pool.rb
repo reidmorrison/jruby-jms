@@ -19,9 +19,12 @@ module JMS
   #   :pool_size         Maximum Pool Size. Default: 10
   #                      The pool only grows as needed and will never exceed
   #                      :pool_size
+  #   :pool_timeout      Number of seconds to wait before raising a TimeoutError
+  #                      if no sessions are available in the poo
+  #                      Default: 60
   #   :pool_warn_timeout Number of seconds to wait before logging a warning when a
-  #                      session in the pool is not available. Measured in seconds
-  #                      Default: 5.0
+  #                      session in the pool is not available
+  #                      Default: 5
   #   :pool_logger       Supply a logger that responds to #debug, #info, #warn and #debug?
   #                      For example: Rails.logger
   #                      Default: JMS.logger
@@ -38,9 +41,11 @@ module JMS
       logger = session_params[:pool_logger] || JMS.logger
       # Define how GenePool can create new sessions
       @pool = GenePool.new(
-        :name => session_params[:pool_name] || self.class.name,
-        :pool_size => session_params[:pool_size] || 10,
+        :name         => session_params[:pool_name] || self.class.name,
+        :pool_size    => session_params[:pool_size] || 10,
         :warn_timeout => session_params[:pool_warn_timeout] || 5,
+        :timeout      => session_params[:pool_timeout] || 60,
+        :close_proc   => nil,
         :logger       => logger) do
         connection.create_session(session_params)
       end
