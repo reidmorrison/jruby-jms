@@ -2,17 +2,6 @@
 
 * http://github.com/reidmorrison/jruby-jms
 
-### Current Activities & Backward Compatibility
-
-The API is relatively stable at this point and I do not expect any breaking
-changes at this point.
-
-There may still be some minor changes to the API to make things better and/or simpler.
-Once the code goes to V1.0.0 I will make every effort to not break the
-existing interface in any way.
-
-### Feedback is welcome and appreciated :)
-
 ### Introduction
 
 jruby-jms attempts to "rubify" the Java JMS API without
@@ -26,9 +15,6 @@ In this way, using regular Ruby constructs a Ruby program can easily
 interact with JMS in a highly performant way. Also, in this way you are not
 limited to whatever the Ruby wrapper would have exposed, since the entire JMS
 API is available to you at any time.
-
-The initial internal use version of JRuby-JMS was created in 2008. It has been
-in use in production since 2009.
 
 ### Install
 
@@ -91,25 +77,26 @@ Producers write messages to queues or topics
 
 ActiveMQ Example:
 
-    require 'rubygems'
-    require 'jms'
+```ruby
+require 'rubygems'
+require 'jms'
 
-    # Connect to ActiveMQ
-    config = {
-      :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-      :broker_url => 'tcp://localhost:61616',
-      :require_jars => [
-        "~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar",
-        "~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar",
-        "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar"
-      ]
-    }
+# Connect to ActiveMQ
+config = {
+    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+    :broker_url => 'tcp://localhost:61616',
+    :require_jars => [
+      "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar",
+      "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.17.jar"
+    ]
+}
 
-    JMS::Connection.session(config) do |session|
-      session.producer(:queue_name => 'ExampleQueue') do |producer|
-        producer.send(session.message("Hello World"))
-      end
+JMS::Connection.session(config) do |session|
+    session.producer(:queue_name => 'ExampleQueue') do |producer|
+    producer.send(session.message("Hello World"))
     end
+end
+```
 
 ### Consumer
 
@@ -117,21 +104,26 @@ Consumers read message from a queue or topic
 
 ActiveMQ Example:
 
-    require 'rubygems'
-    require 'jms'
+```ruby
+require 'rubygems'
+require 'jms'
 
-    # Connect to ActiveMQ
-    config = {
-      :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-      :broker_url => 'tcp://localhost:61616',
-      :require_jars => ["~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"]
-    }
+# Connect to ActiveMQ
+config = {
+    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
+    :broker_url => 'tcp://localhost:61616',
+    :require_jars => [
+      "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar",
+      "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.17.jar"
+    ]
+}
 
-    JMS::Connection.session(config) do |session|
-      session.consume(:queue_name => 'ExampleQueue', :timeout=>1000) do |message|
-        p message
-      end
+JMS::Connection.session(config) do |session|
+    session.consume(:queue_name => 'ExampleQueue', :timeout=>1000) do |message|
+    p message
     end
+end
+```
 
 ## Overview
 
@@ -163,12 +155,11 @@ In order to communicate with a JMS V 1.1 provider jruby-jms needs the jar files 
 by the JMS provider. As in the examples above the jar files can be specified in
 the configuration element :require_jars. Otherwise, the jars must be explicitly
 required in the Ruby code:
-  `require "~/Applications/apache-activemq-5.4.2/activemq-all-5.4.2.jar"`
+  `require "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar"`
 
 ### JRuby
 
-jruby-jms has been tested against JRuby 1.5.1 and 1.6.1, but should work with any
-current JRuby version.
+jruby-jms has been tested against JRuby 1.5.1, 1.6.1, and 1.7.0 RC2
 
 ## Development
 
@@ -203,11 +194,11 @@ This project uses [Semantic Versioning](http://semver.org/).
 
 ## Author
 
-Reid Morrison :: rubywmq@gmail.com :: @reidmorrison
+Reid Morrison :: reidmo@gmail.com :: @reidmorrison
 
 ## License
 
-Copyright 2008 - 2011  J. Reid Morrison
+Copyright 2008 - 2012  J. Reid Morrison
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
