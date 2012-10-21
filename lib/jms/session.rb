@@ -471,19 +471,3 @@ module JMS::Session
     self.browser(params) {|b| b.each(params, &proc)}
   end
 end
-
-# Workaround for IBM MQ JMS implementation that implements an undocumented consume method
-if defined? com.ibm.mq.jms::MQSession
-  class com.ibm.mq.jms::MQSession
-    def consume(params, &proc)
-      result = nil
-      c = self.consumer(params)
-      begin
-        result = c.each(params, &proc)
-      ensure
-        c.close
-      end
-      result
-    end
-  end
-end

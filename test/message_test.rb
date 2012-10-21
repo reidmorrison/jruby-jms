@@ -69,7 +69,6 @@ class JMSTest < Test::Unit::TestCase
     should 'support setting persistence using symbols and the java constants' do
       JMS::Connection.session(@config) do |session|
         message = session.message('Hello World')
-        assert_equal message.jms_delivery_mode_sym, :non_persistent
         message.jms_delivery_mode_sym = :non_persistent
         assert_equal message.jms_delivery_mode_sym, :non_persistent
         message.jms_delivery_mode_sym = :persistent
@@ -106,7 +105,7 @@ class JMSTest < Test::Unit::TestCase
       JMS::Connection.session(@config) do |session|
         assert_not_nil session
         data = nil
-        session.producer(:queue_name => :temporary) do |producer|
+        session.producer(:queue_name => @queue_name) do |producer|
           message = session.message('Hello World')
           message.jms_delivery_mode_sym = :persistent
           assert_equal :persistent, message.jms_delivery_mode_sym
