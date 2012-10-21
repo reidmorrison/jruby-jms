@@ -22,14 +22,15 @@ API is available to you at any time.
 
 ### Simplification
 
-One of the difficulties with the regular JMS API is that it use completely
+One of the difficulties with the regular JMS API is that it uses completely
 separate classes for Topics and Queues in JMS 1.1. This means that once a
-program writes to a Queue for example, that without changing the program it
-could not be changed to write to a topic. Also a consumer on a topic or a queue
-are identical. jruby-jms fixes this issue by allowing you to have a Consumer
-or Producer that is independent of whether it is producing or consuming to/from
+program writes to a Queue for example, that without modifying the source code
+the program it cannot write to a topic.
+
+jruby-jms fixes this issue by allowing you to have a Consumer or Producer that
+is independent of whether it is producing or consuming to/from
 or a Topic or a Queue. The complexity of which JMS class is used is taken care
-of by jruby-jms.
+of transparently by jruby-jms.
 
 ## Concepts & Terminology
 
@@ -46,9 +47,9 @@ Depending on which JMS provider you are using they refer to their centralized
 server as either a Broker or Queue Manager. The Broker or Queue Manager is the
 centralized "server" through which all messages pass through.
 
-Some Brokers support an in-vm broker instance so that messages can be passed
+Some Brokers support an in-JVM broker instance so that messages can be passed
 between producers and consumers within the same Java Virtual Machine (JVM)
-instance. This removes the need to make any network calls. Highly recommended
+instance. This removes the need to make any network calls. Useful
 for passing messages between threads in the same JVM.
 
 ### Connection
@@ -56,14 +57,14 @@ for passing messages between threads in the same JVM.
 In order to connect to any broker the Client JMS application must create a
 connection. In traditional JMS a ConnectionFactory is used to create connections.
 In jruby-jms the JMS::Connection takes care of the complexities of dealing with
-the factory class, just pass the required parameters to Connection.new at it
-takes care of the rest.
+the factory class, just pass the required parameters to Connection.new and
+jruby-jms takes care of the rest.
 
 ### Queue
 
-A queue used for holding messages.
-The queue is defined prior to the message being sent and is used to hold the
-messages. The consumer does not have to be running in order to receive messages.
+A queue is used to hold messages. The queue must be defined prior to the message
+being sent and is used to hold the messages. The consumer does not have to be
+active in order to send messages.
 
 ### Topic
 
@@ -139,13 +140,13 @@ used by one thread at a time.
 For consumers, it is recommended to create a session for each thread and leave
 that thread blocked on Consumer.receive. Or, even better use Connection.on_message
 which will create a session, within which any message received from the specified
-queue or topic match will be passed to the block.
+queue or topic will be passed to the block.
 
 ## Logging
 
 jruby-jms detects the logging available in the current environment.
-When running under Rails it will use the Rails logger, otherwise the standard
-Ruby logger. The logger can also be replaced by calling Connection.logger=
+When running under Rails it will use the Rails logger, otherwise it will use the
+standard Ruby logger. The logger can also be replaced by calling Connection.logger=
 
 ## Dependencies
 
@@ -155,23 +156,14 @@ In order to communicate with a JMS V 1.1 provider jruby-jms needs the jar files 
 by the JMS provider. As in the examples above the jar files can be specified in
 the configuration element :require_jars. Otherwise, the jars must be explicitly
 required in the Ruby code:
-  `require "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar"`
+
+```ruby
+require "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar"
+```
 
 ### JRuby
 
 jruby-jms has been tested against JRuby 1.5.1, 1.6.1, and 1.7.0 RC2
-
-## Development
-
-Want to contribute to jruby-jms?
-
-First clone the repo and run the tests:
-
-    git clone git://github.com/reidmorrison/jruby-jms.git
-    cd jruby-jms
-    jruby -S rake test
-
-Feel free to submit any issues and we'll try to resolve it.
 
 ## Contributing
 
