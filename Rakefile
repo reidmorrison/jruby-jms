@@ -17,6 +17,7 @@ task :gem  do |t|
     s.description = 'JRuby-JMS is a Java and Ruby library that exposes the Java JMS API in a ruby friendly way. For JRuby only.'
     s.summary = 'JRuby interface into JMS'
     s.files = FileList["./**/*"].exclude('*.gem', './nbproject/*').map{|f| f.sub(/^\.\//, '')}
+    s.add_dependency 'gene_pool'
     s.has_rdoc = true
   end
   Gem::Builder.new(gemspec).build

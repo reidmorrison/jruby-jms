@@ -16,7 +16,7 @@
 
 # Extend JMS Message Producer Interface with Ruby methods
 #
-# For further help on javax.jms.Message
+# For further help on javax.jms.MessageProducer
 #   http://download.oracle.com/javaee/6/api/javax/jms/MessageProducer.html
 #
 # Interface javax.jms.Producer
