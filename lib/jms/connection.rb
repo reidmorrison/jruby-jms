@@ -112,6 +112,7 @@ module JMS
         end
       end if jar_list
 
+      require 'jms/mq_workaround'
       require 'jms/imports'
       require 'jms/message_listener_impl'
       require 'jms/message'
