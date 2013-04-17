@@ -1,3 +1,9 @@
+## 1.0.0 (2012-10-21)
+
+* Issue #10 Support WebSphereMQ V7
+* Issue #11 Add GenePool dependency for ConnectionPool
+* Include version
+
 ## 0.11.2 (2011-06-01)
 
 * Issue #8 Add ability to set Producer delivery mode using a Symbol
