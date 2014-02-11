@@ -102,7 +102,37 @@ wmq:
 
 # Oracle AQ 9
 oracleaq:
-  :factory => 'JMS::OracleAQConnectionFactory',
-  :url => 'jdbc:oracle:thin:@hostname:1521:instanceid',
-  :username => 'aquser',
-  :password => 'mypassword'
+  :factory: 'JMS::OracleAQConnectionFactory'
+  :url: 'jdbc:oracle:thin:@hostname:1521:instanceid'
+  :username: 'aquser'
+  :password: 'mypassword'
+  :require_jars:
+    - ~/Applications/oraclestreams/ojdbc6.jar
+    - ~/Applications/oraclestreams/jmscommon.jar
+    - ~/Applications/oraclestreams/aqapi.jar
+    - ~/Applications/oraclestreams/xdb.jar
+    - ~/Applications/oraclestreams/jta.jar
+
+oracleaq_simple:
+  :factory: 'JMS::OracleAQConnectionFactory'
+  :url: 'jdbc:oracle:thin:aquser/mypassword@hostname:1521:instanceid'
+  :require_jars:
+    - ~/Applications/oraclestreams/ojdbc6.jar
+    - ~/Applications/oraclestreams/jmscommon.jar
+    - ~/Applications/oraclestreams/aqapi.jar
+    - ~/Applications/oraclestreams/xdb.jar
+    - ~/Applications/oraclestreams/jta.jar
+    
+oracleaq_jndi:
+  :jndi_name: ConnectionFactory
+  :jndi_context:
+    java.naming.factory.initial: oracle.jms.AQjmsInitialContextFactory
+    java.naming.security.principal: aquser
+    java.naming.security.credentials: mypassword
+    db_url: jdbc:oracle:thin:@hostname:1521:instanceid
+  :require_jars:
+    - ~/Applications/oraclestreams/ojdbc6.jar
+    - ~/Applications/oraclestreams/jmscommon.jar
+    - ~/Applications/oraclestreams/aqapi.jar
+    - ~/Applications/oraclestreams/xdb.jar
+    - ~/Applications/oraclestreams/jta.jar 
