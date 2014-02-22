@@ -124,7 +124,6 @@ module JMS
       require 'jms/message_consumer'
       require 'jms/message_producer'
       require 'jms/queue_browser'
-      require 'jms/oracle_a_q_connection_factory'
     end
 
     # Create a connection to the JMS provider
@@ -178,11 +177,20 @@ module JMS
       connection_factory = nil
       factory = options.delete(:factory)
       if factory
+        # If factory check if oracle is needed.
+        if (factory.include? 'AQjmsFactory')
+          require 'jms/oracle_a_q_connection_factory'
+        end
+
         # If factory is a string, then it is the name of a class, not the class itself
         factory = eval(factory) if factory.respond_to? :to_str
         connection_factory = factory.new
       elsif jndi_name = options[:jndi_name]
         raise "Missing mandatory parameter :jndi_context missing in call to Connection::connect" unless jndi_context = options[:jndi_context]
+        if jndi_context['java.naming.factory.initial'].include? 'AQjmsInitialContextFactory'
+          require 'jms/oracle_a_q_connection_factory'
+        end
+
         jndi = javax.naming.InitialContext.new(java.util.Hashtable.new(jndi_context))
         begin
           connection_factory = jndi.lookup jndi_name

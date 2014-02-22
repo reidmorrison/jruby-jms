@@ -80,12 +80,12 @@ hornetq:
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
   :require_jars:
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-core.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/hornetq-jms-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jboss-jms-api.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/jnp-client.jar
-    - ~/Applications/hornetq-2.2.2.Final/lib/netty.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-commons.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-core-client.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-jms-client.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/jboss-jms-api.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/jnp-client.jar
+    - ~/Applications/hornetq-2.4.0.Final/lib/netty.jar
 
 # IBM WebSphere MQ
 wmq:
@@ -122,7 +122,7 @@ oracleaq_simple:
     - ~/Applications/oraclestreams/aqapi.jar
     - ~/Applications/oraclestreams/xdb.jar
     - ~/Applications/oraclestreams/jta.jar
-    
+
 oracleaq_jndi:
   :jndi_name: ConnectionFactory
   :jndi_context:
@@ -135,4 +135,4 @@ oracleaq_jndi:
     - ~/Applications/oraclestreams/jmscommon.jar
     - ~/Applications/oraclestreams/aqapi.jar
     - ~/Applications/oraclestreams/xdb.jar
-    - ~/Applications/oraclestreams/jta.jar 
+    - ~/Applications/oraclestreams/jta.jar
