@@ -137,7 +137,7 @@ oracleaq_simple:
 oracleaq_jndi:
   :jndi_name: ConnectionFactory
   :jndi_context:
-    java.naming.factory.initial: oracle.jms.AQjmsInitialContextFactor
+    java.naming.factory.initial: oracle.jms.AQjmsInitialContextFactory
     java.naming.security.principal: aquser
     java.naming.security.credentials: mypassword
     db_url: jdbc:oracle:thin:@hostname:1521:instanceid
