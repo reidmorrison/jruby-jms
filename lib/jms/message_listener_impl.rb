@@ -59,7 +59,7 @@ module JMS
       rescue StandardError => bang
         JMS::logger.error "Unhandled Exception processing JMS Message. Doesn't compile: " + bang
         JMS::logger.error "Ignoring poison message:\n#{message.inspect}"
-        JMS::logger.error boom.backtrace.join("\n")
+        JMS::logger.error bang.backtrace.join("\n")
       rescue => exc
         JMS::logger.error "Unhandled Exception processing JMS Message. Exception occurred:\n#{exc}"
         JMS::logger.error "Ignoring poison message:\n#{message.inspect}"
