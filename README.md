@@ -190,7 +190,7 @@ Reid Morrison :: reidmo@gmail.com :: @reidmorrison
 
 ## License
 
-Copyright 2008 - 2012  J. Reid Morrison
+Copyright 2008 - 2014  J. Reid Morrison
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

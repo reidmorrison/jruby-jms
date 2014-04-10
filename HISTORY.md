@@ -1,3 +1,9 @@
+## 1.1.0 (2014-04-10)
+
+* Support Oracle AQ 11gR2
+* Tibco EMS Examples
+* Add .gemspec file
+
 ## 1.0.0 (2012-10-21)
 
 * Issue #10 Support WebSphereMQ V7
