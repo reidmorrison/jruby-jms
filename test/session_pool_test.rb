@@ -6,6 +6,7 @@ require 'test/unit'
 require 'shoulda'
 require 'jms'
 require 'yaml'
+require 'timeout'
 
 class JMSTest < Test::Unit::TestCase
   context 'JMS Session' do
