@@ -160,9 +160,17 @@ queue or topic will be passed to the block.
 
 ## Logging
 
-jruby-jms detects the logging available in the current environment.
-When running under Rails it will use the Rails logger, otherwise it will use the
-standard Ruby logger. The logger can also be replaced by calling `JMS.logger=`
+jruby-jms uses [Semantic Logger](http://reidmorrison.github.io/semantic_logger/) for logging since it is
+fully thread-aware, uses in-memory queue based logging for performance, and has several other useful features.
+
+To enable Semantic Logger in a rails logger, include the gem [rails_semantic_logger](http://reidmorrison.github.io/semantic_logger/rails.html)
+
+For standalone installations:
+
+```ruby
+SemanticLogger.add_appender('test.log', &SemanticLogger::Appender::Base.colorized_formatter)
+SemanticLogger.default_level = :info
+```
 
 ## Dependencies
 
@@ -184,22 +192,8 @@ jruby-jms has been tested against JRuby 1.7, and JRuby 9.0.0.0
 
 ## Versioning
 
+This project uses [Semantic Versioning](http://semver.org/).
+
 ## Author
 
 Reid Morrison :: reidmo@gmail.com :: @reidmorrison
-
-## License
-
-Copyright 2008 - 2015  J. Reid Morrison
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.

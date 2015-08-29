@@ -483,17 +483,14 @@ module JMS
     #   see regular session parameters from: JMS::Connection#initialize
     #
     # Additional parameters for controlling the session pool itself
-    #   :pool_name         Name of the pool as it shows up in the logger.
-    #                      Default: 'JMS::SessionPool'
     #   :pool_size         Maximum Pool Size. Default: 10
     #                      The pool only grows as needed and will never exceed
     #                      :pool_size
     #   :pool_warn_timeout Number of seconds to wait before logging a warning when a
     #                      session in the pool is not available. Measured in seconds
     #                      Default: 5.0
-    #   :pool_logger       Supply a logger that responds to #debug, #info, #warn and #debug?
-    #                      For example: Rails.logger
-    #                      Default: None
+    #   :pool_name         Name of the pool as it shows up in the logger.
+    #                      Default: 'JMS::SessionPool'
     # Example:
     #   session_pool = connection.create_session_pool(config)
     #
