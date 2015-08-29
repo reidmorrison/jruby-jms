@@ -1,19 +1,3 @@
-################################################################################
-#  Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
-
 # Extend JMS Message Interface with Ruby methods
 #
 # A Message is the item that can be put on a queue, or obtained from a queue.
@@ -210,30 +194,31 @@ module JMS::Message
   #   :persistent
   #   :non_persistent
   def jms_delivery_mode_sym=(mode)
-    val = case mode
-    when :persistent
-      JMS::DeliveryMode::PERSISTENT
-    when :non_persistent
-      JMS::DeliveryMode::NON_PERSISTENT
-    else
-      raise "Unknown delivery mode symbol: #{mode}"
-    end
+    val =
+      case mode
+      when :persistent
+        JMS::DeliveryMode::PERSISTENT
+      when :non_persistent
+        JMS::DeliveryMode::NON_PERSISTENT
+      else
+        raise "Unknown delivery mode symbol: #{mode}"
+      end
     self.setJMSDeliveryMode(val)
   end
 
   # Return the attributes (header fields) of the message as a Hash
   def attributes
     {
-      :jms_correlation_id => jms_correlation_id,
-      :jms_delivery_mode_sym => jms_delivery_mode_sym,
-      :jms_destination => jms_destination.nil? ? nil : jms_destination.to_string,
-      :jms_expiration => jms_expiration,
-      :jms_message_id => jms_message_id,
-      :jms_priority => jms_priority,
-      :jms_redelivered => jms_redelivered?,
-      :jms_reply_to => jms_reply_to,
-      :jms_timestamp => jms_timestamp,
-      :jms_type => jms_type,
+      jms_correlation_id:    jms_correlation_id,
+      jms_delivery_mode_sym: jms_delivery_mode_sym,
+      jms_destination:       jms_destination.nil? ? nil : jms_destination.to_string,
+      jms_expiration:        jms_expiration,
+      jms_message_id:        jms_message_id,
+      jms_priority:          jms_priority,
+      jms_redelivered:       jms_redelivered?,
+      jms_reply_to:          jms_reply_to,
+      jms_timestamp:         jms_timestamp,
+      jms_type:              jms_type,
     }
   end
 
@@ -258,14 +243,14 @@ module JMS::Message
   # Return Properties as a hash
   def properties
     h = {}
-    properties_each_pair {|k,v| h[k]=v}
+    properties_each_pair { |k, v| h[k]=v }
     h
   end
 
   # Set Properties from an existing hash
   def properties=(h)
     clear_properties
-    h.each_pair {|k,v| setObjectProperty(k.to_s, v)}
+    h.each_pair { |k, v| setObjectProperty(k.to_s, v) }
     h
   end
 

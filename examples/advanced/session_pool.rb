@@ -3,20 +3,17 @@
 #   This example shows how to have multiple producers publishing information
 #   to topics
 #
-
-# Allow examples to be run in-place without requiring a gem install
-$LOAD_PATH.unshift File.dirname(__FILE__) + '/../../lib'
-
-require 'rubygems'
 require 'yaml'
 require 'jms'
- 
+# Also add 'gene_pool' to list of gems in Gemfile
+require 'gene_pool'
+
 jms_provider = ARGV[0] || 'activemq'
 
 ### This part would typically go in a Rails Initializer ###
 
 # Load Connection parameters from configuration file
-config = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'jms.yml'))[jms_provider]
+config       = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'jms.yml'))[jms_provider]
 raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless config
 
 JMS_CONNECTION = JMS::Connection.new(config)
@@ -31,7 +28,7 @@ end
 
 ### This part would typically go in the Rails Model ###
 
-JMS_SESSION_POOL.producer(:queue_name => 'SampleQueue') do |session, producer|
-  producer.send(session.message("Hello World"))
+JMS_SESSION_POOL.producer(queue_name: 'SampleQueue') do |session, producer|
+  producer.send(session.message('Hello World'))
 end
 

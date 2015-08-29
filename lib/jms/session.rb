@@ -1,19 +1,3 @@
-################################################################################
-#  Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
-
 # For each thread that will be processing messages concurrently a separate
 # session is required. All sessions can share a single connection to the same
 # JMS Provider.
@@ -35,7 +19,7 @@
 #   See: Connection::consumer
 #
 #   Example:
-#      destination = session.create_destination(:queue_name => "MyQueue")
+#      destination = session.create_destination(queue_name: "MyQueue")
 #      session.create_consumer(destination)
 #
 #	create_consumer(destination, message_selector)
@@ -118,25 +102,26 @@ module JMS::Session
   #
   # If automated duck typing is not desired, the type of the message can be specified
   # by setting the parameter 'type' to any one of:
-  #    :text   => Creates a Text Message
-  #    :map    => Creates a Map Message
-  #    :bytes  => Creates a Bytes Message
+  #    text:   Creates a Text Message
+  #    map:    Creates a Map Message
+  #    bytes:  Creates a Bytes Message
   def message(data, type=nil)
     jms_message = nil
-    type ||= if data.respond_to?(:to_str, false)
-      :text
-    elsif data.respond_to?(:each_pair, false)
-      :map
-    else
-      raise "Unknown data type #{data.class.to_s} in Message"
-    end
+    type        ||=
+      if data.respond_to?(:to_str, false)
+        :text
+      elsif data.respond_to?(:each_pair, false)
+        :map
+      else
+        raise "Unknown data type #{data.class.to_s} in Message"
+      end
 
     case type
     when :text
-      jms_message = self.createTextMessage
+      jms_message      = self.createTextMessage
       jms_message.text = data.to_str
     when :map
-      jms_message = self.createMapMessage
+      jms_message      = self.createMapMessage
       jms_message.data = data
     when :bytes
       jms_message = self.createBytesMessage
@@ -160,19 +145,19 @@ module JMS::Session
   #       of deleting them for you
   #
   # To create a queue:
-  #   session.create_destination(:queue_name => 'name of queue')
+  #   session.create_destination(queue_name: 'name of queue')
   #
   # To create a temporary queue:
-  #   session.create_destination(:queue_name => :temporary)
+  #   session.create_destination(queue_name: :temporary)
   #
   # To create a queue:
   #   session.create_destination('queue://queue_name')
   #
   # To create a topic:
-  #   session.create_destination(:topic_name => 'name of queue')
+  #   session.create_destination(topic_name: 'name of queue')
   #
   # To create a temporary topic:
-  #   session.create_destination(:topic_name => :temporary)
+  #   session.create_destination(topic_name: :temporary)
   #
   # To create a topic:
   #   session.create_destination('topic://topic_name')
@@ -180,16 +165,15 @@ module JMS::Session
   # Create the destination based on the parameter supplied
   #
   # Parameters:
-  #   :queue_name => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :topic_name => String: Name of the Topic to write to or subscribe to
-  #                  Symbol: :temporary => Create temporary topic
+  #   topic_name: [String] Name of the Topic to write to or subscribe to
+  #               [Symbol] Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
-  #
+  #   destination: [javaxJms::Destination] Destination to use
   # Returns the result of the supplied block
   def create_destination(params)
     # Allow a Java JMS destination object to be passed in
@@ -207,7 +191,9 @@ module JMS::Session
       topic_name = params[:topic_name]
     end
 
-    raise "Missing mandatory parameter :queue_name or :topic_name to Session::producer, Session::consumer, or Session::browser" unless queue_name || topic_name
+    unless queue_name || topic_name
+      raise(ArgumentError, 'Missing mandatory parameter :queue_name or :topic_name to Session::producer, Session::consumer, or Session::browser')
+    end
 
     if queue_name
       queue_name == :temporary ? create_temporary_queue : create_queue(queue_name)
@@ -219,36 +205,36 @@ module JMS::Session
   # Create a queue or topic to send or receive messages from
   #
   # A block must be supplied so that if it is a temporary topic or queue
-  # it will be deleted after the proc is complete
+  # it will be deleted after the block is complete
   #
   # To create a queue:
-  #   session.destination(:queue_name => 'name of queue')
+  #   session.destination(queue_name: 'name of queue')
   #
   # To create a temporary queue:
-  #   session.destination(:queue_name => :temporary)
+  #   session.destination(queue_name: :temporary)
   #
   # To create a topic:
-  #   session.destination(:topic_name => 'name of queue')
+  #   session.destination(topic_name: 'name of queue')
   #
   # To create a temporary topic:
-  #   session.destination(:topic_name => :temporary)
+  #   session.destination(topic_name: :temporary)
   #
   # Create the destination based on the parameter supplied
   #
   # Parameters:
-  #   :queue_name => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :topic_name => String: Name of the Topic to write to or subscribe to
-  #                  Symbol: :temporary => Create temporary topic
+  #   topic_name: [String] Name of the Topic to write to or subscribe to
+  #               [Symbol] Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
+  #   destination: [javaxJms::Destination] Destination to use
   #
   # Returns the result of the supplied block
   def destination(params={}, &block)
-    raise "Missing mandatory Block when calling JMS::Session#destination" unless block
+    raise(ArgumentError, 'Missing mandatory Block when calling JMS::Session#destination') unless block
     dest = nil
     begin
       dest = create_destination(params)
@@ -287,9 +273,9 @@ module JMS::Session
 
   # Return the topic matching the topic name supplied
   # Call the Proc if supplied
-  def topic(topic_name, &proc)
+  def topic(topic_name, &block)
     t = create_topic(topic_name)
-    proc.call(t) if proc
+    block.call(t) if block
     t
   end
 
@@ -317,20 +303,20 @@ module JMS::Session
   # Call the Proc if supplied, then automatically close the producer
   #
   # Parameters:
-  #   :queue_name     => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :topic_name => String: Name of the Topic to write to or subscribe to
-  #                  Symbol: :temporary => Create temporary topic
+  #   topic_name: [String] Name of the Topic to write to or subscribe to
+  #               [Symbol] Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit JMS::Destination to use
-  def producer(params, &proc)
+  #   destination: [javaxJms::Destination] Destination to use
+  def producer(params, &block)
     p = self.create_producer(self.create_destination(params))
-    if proc
+    if block
       begin
-        proc.call(p)
+        block.call(p)
       ensure
         p.close
         p = nil
@@ -342,38 +328,38 @@ module JMS::Session
   # Return a consumer for the destination
   # A consumer can read messages from the queue or topic
   #
-  # Call the Proc if supplied, then automatically close the consumer
+  # Call the block if supplied, then automatically close the consumer
   #
   # Parameters:
-  #   :queue_name => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :topic_name => String: Name of the Topic to write to or subscribe to
-  #                  Symbol: :temporary => Create temporary topic
+  #   topic_name: [String] Name of the Topic to write to or subscribe to
+  #               [Symbol] Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
+  #   destination: [javaxJms::Destination] Destination to use
   #
-  #   :selector   => Filter which messages should be returned from the queue
+  #   selector:   Filter which messages should be returned from the queue
   #                  Default: All messages
-  #   :no_local   => Determine whether messages published by its own connection
+  #   no_local:   Determine whether messages published by its own connection
   #                  should be delivered to it
   #                  Default: false
-  def consumer(params, &proc)
+  def consumer(params, &block)
     destination = create_destination(params)
-    c = nil
-    if params[:no_local]
-      c = create_consumer(destination, params[:selector] || '', params[:no_local])
-    elsif params[:selector]
-      c = create_consumer(destination, params[:selector])
-    else
-      c = create_consumer(destination)
-    end
+    c           =
+      if params[:no_local]
+        create_consumer(destination, params[:selector] || '', params[:no_local])
+      elsif params[:selector]
+        create_consumer(destination, params[:selector])
+      else
+        create_consumer(destination)
+      end
 
-    if proc
+    if block
       begin
-        proc.call(c)
+        block.call(c)
       ensure
         c.close
         c = nil
@@ -386,19 +372,19 @@ module JMS::Session
   # A consumer can read messages from the queue or topic
   #
   # Parameters:
-  #   :queue_name     => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :topic_name => String: Name of the Topic to write to or subscribe to
-  #                  Symbol: :temporary => Create temporary topic
+  #   topic_name: [String] Name of the Topic to write to or subscribe to
+  #               [Symbol] Create temporary topic
   #                  Mandatory unless :queue_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
+  #   destination: [javaxJms::Destination] Destination to use
   #
-  #   :selector   => Filter which messages should be returned from the queue
+  #   selector:   Filter which messages should be returned from the queue
   #                  Default: All messages
-  #   :no_local   => Determine whether messages published by its own connection
+  #   no_local:   Determine whether messages published by its own connection
   #                  should be delivered to it
   #                  Default: false
   #
@@ -410,12 +396,12 @@ module JMS::Session
   #                     in the time interval specified
   #      Default: 0
   #
-  def consume(params, &proc)
-    c = self.consumer(params)
+  def consume(params, &block)
     begin
-      c.each(params, &proc)
+      c = self.consumer(params)
+      c.each(params, &block)
     ensure
-      c.close
+      c.close if c
     end
   end
 
@@ -426,28 +412,28 @@ module JMS::Session
   # Call the Proc if supplied, then automatically close the consumer
   #
   # Parameters:
-  #   :queue_name     => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
+  #   destination: [javaxJms::Destination] Destination to use
   #
-  #   :selector   => Filter which messages should be returned from the queue
+  #   selector:   Filter which messages should be returned from the queue
   #                  Default: All messages
-  def browser(params, &proc)
-    raise "Session::browser requires a code block to be executed" unless proc
+  def browser(params, &block)
+    raise(ArgumentError, 'Session::browser requires a code block to be executed') unless block
 
     destination = create_destination(params)
-    b = nil
+    b           = nil
     if params[:selector]
       b = create_browser(destination, params[:selector])
     else
       b = create_browser(destination)
     end
 
-    if proc
+    if block
       begin
-        proc.call(b)
+        block.call(b)
       ensure
         b.close
         b = nil
@@ -459,15 +445,15 @@ module JMS::Session
   # Browse the specified queue, calling the Proc supplied for each message found
   #
   # Parameters:
-  #   :queue_name     => String: Name of the Queue to return
-  #                  Symbol: :temporary => Create temporary queue
+  #   queue_name: [String] Name of the Queue to return
+  #               [Symbol] Create temporary queue
   #                  Mandatory unless :topic_name is supplied
   #     Or,
-  #   :destination=> Explicit javaxJms::Destination to use
+  #   destination: [javaxJms::Destination] Destination to use
   #
-  #   :selector   => Filter which messages should be returned from the queue
+  #   selector:    Filter which messages should be returned from the queue
   #                  Default: All messages
-  def browse(params={}, &proc)
-    self.browser(params) {|b| b.each(params, &proc)}
+  def browse(params={}, &block)
+    self.browser(params) { |b| b.each(params, &block) }
   end
 end

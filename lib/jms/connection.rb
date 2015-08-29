@@ -1,19 +1,3 @@
-################################################################################
-#  Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
-
 # Module: Java Messaging System (JMS) Interface
 module JMS
   # Every JMS session must have at least one Connection instance
@@ -32,12 +16,11 @@ module JMS
   #  require 'jms'
   #
   #  JMS::Connection.create_session(
-  #    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-  #    :broker_url => 'tcp://localhost:61616',
-  #    :require_jars => [
-  #      '~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar',
-  #      '~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar',
-  #      '~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar',
+  #    factory:      'org.apache.activemq.ActiveMQConnectionFactory',
+  #    broker_url:   'tcp://localhost:61616',
+  #    require_jars: [
+  #      '/usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar',
+  #      '/usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar'
   #    ]
   #  ) do |session|
   #    session.consumer(:queue_name=>'TEST') do |consumer|
@@ -100,15 +83,13 @@ module JMS
     #                     to load for this JMS Provider
     #
     # Returns nil
-    #
-    # TODO make this a class method
     def fetch_dependencies(jar_list)
       jar_list.each do |jar|
-        JMS::logger.debug "Loading Jar File:#{jar}"
+        JMS.logger.debug "Loading Jar File:#{jar}"
         begin
           require jar
         rescue Exception => exc
-          JMS::logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
+          JMS.logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
         end
       end if jar_list
 
@@ -139,21 +120,21 @@ module JMS
     #   2. Supply an instance of the JMS Provider class itself
     #   3. Use a JNDI lookup to return the JMS Provider Factory class
     # Parameters:
-    #   :factory   => String: Name of JMS Provider Factory class
-    #              => Class: JMS Provider Factory class itself
+    #   factory:   [String] Name of JMS Provider Factory class
+    #              [Class]  JMS Provider Factory class itself
     #
-    #   :jndi_name    => String: Name of JNDI entry at which the Factory can be found
-    #   :jndi_context => Mandatory if jndi lookup is being used, contains details
-    #                    on how to connect to JNDI server etc.
+    #   jndi_name:    [String] Name of JNDI entry at which the Factory can be found
+    #   jndi_context: Mandatory if jndi lookup is being used, contains details
+    #                 on how to connect to JNDI server etc.
     #
-    #   :require_jars => An optional array of Jar file names to load for the specified
-    #                    JMS provider. By using this option it is not necessary
-    #                    to put all the JMS Provider specific jar files into the
-    #                    environment variable CLASSPATH prior to starting JRuby
+    #   require_jars: [Array<String>] An optional array of Jar file names to load for the specified
+    #                 JMS provider. By using this option it is not necessary
+    #                 to put all the JMS Provider specific jar files into the
+    #                 environment variable CLASSPATH prior to starting JRuby
     #
-    #   :username  => Username to connect to JMS provider with
-    #   :password  => Password to use when to connecting to the JMS provider
-    #                 Note: :password is ignored if :username is not supplied
+    #   username:  [String] Username to connect to JMS provider with
+    #   password:  [String] Password to use when to connecting to the JMS provider
+    #              Note: :password is ignored if :username is not supplied
     #
     # :factory and :jndi_name are mutually exclusive, both cannot be supplied at the
     # same time. :factory takes precedence over :jndi_name
@@ -162,10 +143,9 @@ module JMS
     # has setters for those properties.
     #
     # For some known examples, see: [Example jms.yml](https://github.com/reidmorrison/jruby-jms/blob/master/examples/jms.yml)
-    #
     def initialize(params = {})
-      # Used by ::on_message
-      @sessions = []
+      # Used by #on_message
+      @sessions  = []
       @consumers = []
 
       options = params.dup
@@ -175,19 +155,17 @@ module JMS
       fetch_dependencies(options.delete(:require_jars))
 
       connection_factory = nil
-      factory = options.delete(:factory)
+      factory            = options.delete(:factory)
       if factory
         # If factory check if oracle is needed.
-        if (factory.include? 'AQjmsFactory')
-          require 'jms/oracle_a_q_connection_factory'
-        end
+        require('jms/oracle_a_q_connection_factory') if factory.include?('AQjmsFactory')
 
         # If factory is a string, then it is the name of a class, not the class itself
-        factory = eval(factory) if factory.respond_to? :to_str
+        factory            = eval(factory) if factory.respond_to?(:to_str)
         connection_factory = factory.new
       elsif jndi_name = options[:jndi_name]
-        raise "Missing mandatory parameter :jndi_context missing in call to Connection::connect" unless jndi_context = options[:jndi_context]
-        if jndi_context['java.naming.factory.initial'].include? 'AQjmsInitialContextFactory'
+        raise(ArgumentError, 'Missing mandatory parameter :jndi_context in call to Connection::connect') unless jndi_context = options[:jndi_context]
+        if jndi_context['java.naming.factory.initial'].include?('AQjmsInitialContextFactory')
           require 'jms/oracle_a_q_connection_factory'
         end
 
@@ -198,21 +176,21 @@ module JMS
           jndi.close
         end
       else
-        raise "Missing mandatory parameter :factory or :jndi_name missing in call to Connection::connect"
+        raise(ArgumentError, 'Missing mandatory parameter :factory or :jndi_name missing in call to Connection::connect')
       end
       options.delete(:jndi_name)
       options.delete(:jndi_context)
 
-      JMS::logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
+      JMS.logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
       options.each_pair do |key, val|
         next if [:username, :password].include?(key)
 
         method = key.to_s+'='
         if connection_factory.respond_to? method
           connection_factory.send method, val
-          JMS::logger.debug "   #{key} = #{connection_factory.send key.to_sym}" if connection_factory.respond_to? key.to_sym
+          JMS.logger.debug "   #{key} = #{connection_factory.send key.to_sym}" if connection_factory.respond_to? key.to_sym
         else
-          JMS::logger.warn "#{connection_factory.java_class} does not understand option: :#{key}=#{val}, ignoring :#{key}" if connection_factory.respond_to? :java_class
+          JMS.logger.warn "#{connection_factory.java_class} does not understand option: :#{key}=#{val}, ignoring :#{key}" if connection_factory.respond_to? :java_class
         end
       end
 
@@ -246,14 +224,14 @@ module JMS
     # closed on completion of the code block
     #
     # Parameters:
-    #  :transacted => true or false
+    #  transacted: [true|false]
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the JMS::Session constants:
-    #     Note: :options are ignored if :transacted => true
+    #  options: any of the JMS::Session constants:
+    #     Note: :options are ignored if transacted: true
     #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
@@ -288,14 +266,14 @@ module JMS
     #       possible
     #
     # Parameters:
-    #  :transacted => true or false
+    #  transacted: true or false
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the JMS::Session constants:
-    #     Note: :options are ignored if :transacted => true
+    #  options: any of the JMS::Session constants:
+    #     Note: :options are ignored if transacted: true
     #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
@@ -314,17 +292,17 @@ module JMS
     #
     def create_session(params={})
       transacted = params[:transacted] || false
-      options = params[:options] || JMS::Session::AUTO_ACKNOWLEDGE
+      options    = params[:options] || JMS::Session::AUTO_ACKNOWLEDGE
       @jms_connection.create_session(transacted, options)
     end
 
     # Close connection with the JMS Provider
     # First close any consumers or sessions that are active as a result of JMS::Connection::on_message
     def close
-      @consumers.each {|consumer| consumer.close } if @consumers
+      @consumers.each { |consumer| consumer.close } if @consumers
       @consumers = []
 
-      @sessions.each {|session| session.close} if @sessions
+      @sessions.each { |session| session.close } if @sessions
       @session=[]
 
       @jms_connection.close if @jms_connection
@@ -390,14 +368,14 @@ module JMS
     # can then be processed.
     #
     # Session Parameters:
-    #  :transacted => true or false
+    #  transacted: true or false
     #      Determines whether transactions are supported within this session.
     #      I.e. Whether commit or rollback can be called
     #      Default: false
     #      Note: :options below are ignored if this value is set to :true
     #
-    #  :options => any of the JMS::Session constants:
-    #     Note: :options are ignored if :transacted => true
+    #  options: any of the JMS::Session constants:
+    #     Note: :options are ignored if transacted: true
     #     JMS::Session::AUTO_ACKNOWLEDGE
     #        With this acknowledgment mode, the session automatically acknowledges
     #        a client's receipt of a message either when the session has successfully
@@ -423,20 +401,20 @@ module JMS
     #                    Default: 1
     #
     # Consumer Parameters:
-    #   :queue_name => String: Name of the Queue to return
-    #                  Symbol: :temporary => Create temporary queue
+    #   queue_name: String: Name of the Queue to return
+    #                  Symbol: temporary: Create temporary queue
     #                  Mandatory unless :topic_name is supplied
     #     Or,
-    #   :topic_name => String: Name of the Topic to write to or subscribe to
-    #                  Symbol: :temporary => Create temporary topic
+    #   topic_name: String: Name of the Topic to write to or subscribe to
+    #                  Symbol: temporary: Create temporary topic
     #                  Mandatory unless :queue_name is supplied
     #     Or,
-    #   :destination=> Explicit javaxJms::Destination to use
+    #   destination:Explicit javaxJms::Destination to use
     #
-    #   :selector   => Filter which messages should be returned from the queue
+    #   selector:   Filter which messages should be returned from the queue
     #                  Default: All messages
     #
-    #   :no_local   => Determine whether messages published by its own connection
+    #   no_local:   Determine whether messages published by its own connection
     #                  should be delivered to the supplied block
     #                  Default: false
     #
@@ -447,7 +425,7 @@ module JMS
     #              or when Destination::statistics is called. In this case MessageConsumer::statistics
     #              can be called several times during processing without affecting the end time.
     #              Also, the start time and message count is not reset until MessageConsumer::each
-    #              is called again with :statistics => true
+    #              is called again with statistics: true
     #
     # Usage: For transacted sessions the block supplied must return either true or false:
     #          true => The session is committed
@@ -462,7 +440,7 @@ module JMS
 
       consumer_count = params[:session_count] || 1
       consumer_count.times do
-        session = self.create_session(params)
+        session  = self.create_session(params)
         consumer = session.consumer(params)
         if session.transacted?
           consumer.on_message(params) do |message|

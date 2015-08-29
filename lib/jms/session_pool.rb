@@ -38,22 +38,21 @@ module JMS
       # Save Session params since it will be used every time a new session is
       # created in the pool
       session_params = params.nil? ? {} : params.dup
-      logger = session_params[:pool_logger] || JMS.logger
+      logger         = session_params[:pool_logger] || JMS.logger
       # Define how GenePool can create new sessions
-      @pool = GenePool.new(
-        :name         => session_params[:pool_name] || self.class.name,
-        :pool_size    => session_params[:pool_size] || 10,
-        :warn_timeout => session_params[:pool_warn_timeout] || 5,
-        :timeout      => session_params[:pool_timeout] || 60,
-        :close_proc   => nil,
-        :logger       => logger) do
+      @pool          = GenePool.new(
+        name:         session_params[:pool_name] || self.class.name,
+        pool_size:    session_params[:pool_size] || 10,
+        warn_timeout: session_params[:pool_warn_timeout] || 5,
+        timeout:      session_params[:pool_timeout] || 60,
+        close_proc:   nil,
+        logger:       logger) do
         connection.create_session(session_params)
       end
 
       # Handle connection failures
       connection.on_exception do |jms_exception|
         logger.error "JMS Connection Exception has occurred: #{jms_exception}" if logger
-        #TODO: Close all sessions in the pool and release from the pool?
       end
     end
 
@@ -83,30 +82,29 @@ module JMS
     # returned to the pool.
     #
     # Parameters:
-    #   :queue_name => String: Name of the Queue to return
-    #                  Symbol: :temporary => Create temporary queue
+    #   queue_name: [String] Name of the Queue to return
+    #               [Symbol] Create temporary queue
     #                  Mandatory unless :topic_name is supplied
     #     Or,
-    #   :topic_name => String: Name of the Topic to write to or subscribe to
-    #                  Symbol: :temporary => Create temporary topic
+    #   topic_name: [String] Name of the Topic to write to or subscribe to
+    #               [Symbol] Create temporary topic
     #                  Mandatory unless :queue_name is supplied
     #     Or,
-    #   :destination=> Explicit javaxJms::Destination to use
+    #   destination: [javaxJms::Destination] Destination to use
     #
-    #   :selector   => Filter which messages should be returned from the queue
+    #   selector:   Filter which messages should be returned from the queue
     #                  Default: All messages
-    #   :no_local   => Determine whether messages published by its own connection
+    #   no_local:   Determine whether messages published by its own connection
     #                  should be delivered to it
     #                  Default: false
     #
     # Example
-    #   session_pool.consumer(:queue_name => 'MyQueue') do |session, consumer|
+    #   session_pool.consumer(queue_name: 'MyQueue') do |session, consumer|
     #     message = consumer.receive(timeout)
     #     puts message.data if message
     #   end
     def consumer(params, &block)
       session do |s|
-        consumer = nil
         begin
           consumer = s.consumer(params)
           block.call(s, consumer)
@@ -122,23 +120,22 @@ module JMS
     # returned to the pool.
     #
     # Parameters:
-    #   :queue_name => String: Name of the Queue to send messages to
-    #                  Symbol: :temporary => Create temporary queue
+    #   queue_name: [String] Name of the Queue to return
+    #               [Symbol] Create temporary queue
     #                  Mandatory unless :topic_name is supplied
     #     Or,
-    #   :topic_name => String: Name of the Topic to send message to
-    #                  Symbol: :temporary => Create temporary topic
+    #   topic_name: [String] Name of the Topic to write to or subscribe to
+    #               [Symbol] Create temporary topic
     #                  Mandatory unless :queue_name is supplied
     #     Or,
-    #   :destination=> Explicit JMS::Destination to use
+    #   destination: [javaxJms::Destination] Destination to use
     #
     # Example
-    #   session_pool.producer(:queue_name => 'ExampleQueue') do |session, producer|
+    #   session_pool.producer(queue_name: 'ExampleQueue') do |session, producer|
     #     producer.send(session.message("Hello World"))
     #   end
     def producer(params, &block)
       session do |s|
-        producer = nil
         begin
           producer = s.producer(params)
           block.call(s, producer)
@@ -154,15 +151,9 @@ module JMS
     #
     # Note: Once closed a session pool cannot be re-used. A new instance must
     #       be created
-    #
-    # TODO: Allow an option to wait for active sessions to be returned before
-    #       closing
     def close
-      @pool.each do |s|
-        s.close
-      end
+      @pool.each { |s| s.close }
     end
 
   end
-
 end

@@ -9,7 +9,7 @@ compromising performance. It does this by sprinkling "Ruby-goodness" into the
 existing JMS Java interfaces, I.e. By adding Ruby methods to the existing
 classes and interfaces. Since jruby-jms exposes the JMS
 Java classes directly there is no performance impact that would have been
-introduced had the entire API been wrapped in a Ruby layer.
+introduced had the entire API been wrapped with an extra Ruby layer.
 
 In this way, using regular Ruby constructs a Ruby program can easily
 interact with JMS in a highly performant way. Also, in this way you are not
@@ -18,7 +18,19 @@ API is available to you at any time.
 
 ### Install
 
-    jgem install jruby-jms
+Add to Gemfile if using bundler:
+
+```ruby
+gem 'jruby-jms'
+```
+
+Install using bundler:
+
+    bundle
+
+If not using Bundler:
+
+    gem install jruby-jms
 
 ### Simplification
 
@@ -79,23 +91,21 @@ Producers write messages to queues or topics
 ActiveMQ Example:
 
 ```ruby
-require 'rubygems'
 require 'jms'
 
 # Connect to ActiveMQ
 config = {
-    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-    :broker_url => 'tcp://localhost:61616',
-    :require_jars => [
-      "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar",
-      "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.17.jar"
-    ]
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 }
 
 JMS::Connection.session(config) do |session|
-    session.producer(:queue_name => 'ExampleQueue') do |producer|
+  session.producer(queue_name: 'ExampleQueue') do |producer|
     producer.send(session.message("Hello World"))
-    end
+  end
 end
 ```
 
@@ -111,18 +121,17 @@ require 'jms'
 
 # Connect to ActiveMQ
 config = {
-    :factory => 'org.apache.activemq.ActiveMQConnectionFactory',
-    :broker_url => 'tcp://localhost:61616',
-    :require_jars => [
-      "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar",
-      "~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.17.jar"
-    ]
+  :factory: org.apache.activemq.ActiveMQConnectionFactory
+  :broker_url: tcp://localhost:61616
+  :require_jars:
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 }
 
 JMS::Connection.session(config) do |session|
-    session.consume(:queue_name => 'ExampleQueue', :timeout=>1000) do |message|
+  session.consume(queue_name: 'ExampleQueue', timeout: 1000) do |message|
     p message
-    end
+  end
 end
 ```
 
@@ -146,7 +155,7 @@ queue or topic will be passed to the block.
 
 jruby-jms detects the logging available in the current environment.
 When running under Rails it will use the Rails logger, otherwise it will use the
-standard Ruby logger. The logger can also be replaced by calling Connection.logger=
+standard Ruby logger. The logger can also be replaced by calling JMS.logger=
 
 ## Dependencies
 
@@ -158,31 +167,15 @@ the configuration element :require_jars. Otherwise, the jars must be explicitly
 required in the Ruby code:
 
 ```ruby
-require "~/Applications/apache-activemq-5.7.0/activemq-all-5.7.0.jar"
+require '/usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar'
+require '/usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar'
 ```
 
 ### JRuby
 
-jruby-jms has been tested against JRuby 1.5.1, 1.6.1, and 1.7.0 RC2
+jruby-jms has been tested against JRuby 1.5.1, 1.6.1, 1.7, and JRuby 9.0.0.0
 
-## Contributing
-
-Once you've made your great commits:
-
-1. [Fork](http://help.github.com/forking/) jruby-jms
-2. Create a topic branch - `git checkout -b my_branch`
-3. Push to your branch - `git push origin my_branch`
-4. Create an [Issue](http://github.com/reidmorrison/jruby-jms/issues) with a link to your branch
-5. That's it!
-
-## Meta
-
-* Code: `git clone git://github.com/reidmorrison/jruby-jms.git`
-* Home: <http://github.com/reidmorrison/jruby-jms>
-* Bugs: <http://github.com/reidmorrison/jruby-jms/issues>
-* Gems: <http://rubygems.org/gems/jruby-jms>
-
-This project uses [Semantic Versioning](http://semver.org/).
+## Versioning
 
 ## Author
 
@@ -190,7 +183,7 @@ Reid Morrison :: reidmo@gmail.com :: @reidmorrison
 
 ## License
 
-Copyright 2008 - 2014  J. Reid Morrison
+Copyright 2008 - 2015  J. Reid Morrison
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

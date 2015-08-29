@@ -1,20 +1,4 @@
-################################################################################
-#  Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
-
-#Interface javax.jms.MapMessage
+# Interface javax.jms.MapMessage
 module JMS::MapMessage
   # Since each is defined, add support for: inject, map, include?, and find_all?
   # <=> also allows support for:  min, max, and sort
@@ -23,7 +7,7 @@ module JMS::MapMessage
   # Return Map Message as a hash
   def to_h
     h = {}
-    each_pair {|key, value| h[key] = value}
+    each_pair { |key, value| h[key] = value }
     h
   end
 
@@ -42,20 +26,20 @@ module JMS::MapMessage
   #   nil      => null
   #   Otherwise it calls ::to_s on the supplied data type
   def data=(data)
-    data.each_pair do |key,val|
+    data.each_pair do |key, val|
       case
       when val.class == Fixnum # 1
-        setLong(key.to_s,val)
+        setLong(key.to_s, val)
       when val.class == Float #1.1
-        setDouble(key.to_s,val)
+        setDouble(key.to_s, val)
       when val.class == Bignum # 11111111111111111
-        setLong(key.to_s,val)
+        setLong(key.to_s, val)
       when (val.class == TrueClass) || (val.class == FalseClass)
-        setBoolean(key.to_s,val)
+        setBoolean(key.to_s, val)
       when val.class == NilClass
-        setObject(key.to_s,val)
+        setObject(key.to_s, val)
       else
-        setString(key.to_s,val.to_s)
+        setString(key.to_s, val.to_s)
       end
     end
   end

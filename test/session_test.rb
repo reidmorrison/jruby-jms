@@ -1,47 +1,32 @@
-# Allow examples to be run in-place without requiring a gem install
-$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
-
-require 'rubygems'
-require 'test/unit'
-require 'shoulda'
-require 'jms'
+require_relative 'test_helper'
 require 'yaml'
 
-class JMSTest < Test::Unit::TestCase
-  context 'JMS Session' do
-    # Load configuration from jms.yml
-    setup do
-      # To change the JMS provider, edit jms.yml and change :default
-
-      # Load Connection parameters from configuration file
-      cfg = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))
-      jms_provider = cfg['default']
-      @config = cfg[jms_provider]
-      raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless @config
-      @queue_name = @config.delete(:queue_name) || raise("Mandatory :queue_name missing from jms.yml")
-      @topic_name = @config.delete(:topic_name) || raise("Mandatory :topic_name missing from jms.yml")
+class JMSTest < Minitest::Test
+  describe 'JMS Session' do
+    before do
+      @config, @queue_name, @topic_name = read_config
     end
 
-    should 'create a session' do
+    it 'create a session' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
       end
     end
 
-    should 'create automatic messages' do
+    it 'create automatic messages' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
         # Create Text Message
         assert_equal session.message("Hello").java_kind_of?(JMS::TextMessage), true
 
         # Create Map Message
-        assert_equal session.message('hello'=>'world').java_kind_of?(JMS::MapMessage), true
+        assert_equal session.message('hello' => 'world').java_kind_of?(JMS::MapMessage), true
       end
     end
 
-    should 'create explicit messages' do
+    it 'create explicit messages' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
         # Create Text Message
         assert_equal session.create_text_message("Hello").java_kind_of?(JMS::TextMessage), true
 
@@ -50,71 +35,71 @@ class JMSTest < Test::Unit::TestCase
       end
     end
 
-    should 'create temporary destinations in blocks' do
+    it 'create temporary destinations in blocks' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
 
         # Temporary Queue
-        session.destination(:queue_name => :temporary) do |destination|
+        session.destination(queue_name: :temporary) do |destination|
           assert_equal destination.java_kind_of?(JMS::TemporaryQueue), true
         end
 
         # Temporary Topic
-        session.create_destination(:topic_name => :temporary) do |destination|
+        session.create_destination(topic_name: :temporary) do |destination|
           assert_equal destination.java_kind_of?(JMS::TemporaryTopic), true
         end
       end
     end
 
-    should 'create temporary destinations' do
+    it 'create temporary destinations' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
 
         # Temporary Queue
-        destination = session.create_destination(:queue_name => :temporary)
+        destination = session.create_destination(queue_name: :temporary)
         assert_equal destination.java_kind_of?(JMS::TemporaryQueue), true
         destination.delete
 
         # Temporary Topic
-        destination = session.create_destination(:topic_name => :temporary)
+        destination = session.create_destination(topic_name: :temporary)
         assert_equal destination.java_kind_of?(JMS::TemporaryTopic), true
         destination.delete
       end
     end
 
-    should 'create destinations in blocks' do
+    it 'create destinations in blocks' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
 
         # Temporary Queue
-        session.destination(:queue_name => @queue_name) do |destination|
+        session.destination(queue_name: @queue_name) do |destination|
           assert_equal destination.java_kind_of?(JMS::Queue), true
         end
 
         # Temporary Topic
-        session.create_destination(:topic_name => @topic_name) do |destination|
+        session.create_destination(topic_name: @topic_name) do |destination|
           assert_equal destination.java_kind_of?(JMS::Topic), true
         end
       end
     end
 
-    should 'create destinations' do
+    it 'create destinations' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
 
         # Queue
-        queue = session.create_destination(:queue_name => @queue_name)
+        queue = session.create_destination(queue_name: @queue_name)
         assert_equal queue.java_kind_of?(JMS::Queue), true
 
         # Topic
-        topic = session.create_destination(:topic_name => @topic_name)
+        topic = session.create_destination(topic_name: @topic_name)
         assert_equal topic.java_kind_of?(JMS::Topic), true
       end
     end
 
-    should 'create destinations using direct methods' do
+    it 'create destinations using direct methods' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
 
         # Queue
         queue = session.queue(@queue_name)

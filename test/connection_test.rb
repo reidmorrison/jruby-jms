@@ -1,68 +1,43 @@
-# Allow examples to be run in-place without requiring a gem install
-$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
+require_relative 'test_helper'
 
-require 'rubygems'
-require 'test/unit'
-require 'shoulda'
-require 'jms'
-require 'yaml'
-
-# Set Log4J properties file so that it does not need to be in the CLASSPATH
-java.lang.System.properties['log4j.configuration'] = "test/log4j.properties"
-
-class JMSTest < Test::Unit::TestCase
-  context 'JMS Connection' do
-    # Load configuration from jms.yml
-    setup do
-      # To change the JMS provider, edit jms.yml and change :default
-
-      # Load Connection parameters from configuration file
-      cfg = YAML.load_file(File.join(File.dirname(__FILE__), 'jms.yml'))
-      jms_provider = cfg['default']
-      @config = cfg[jms_provider]
-      raise "JMS Provider option:#{jms_provider} not found in jms.yml file" unless @config
-      @queue_name = @config.delete(:queue_name) || raise("Mandatory :queue_name missing from jms.yml")
-      @topic_name = @config.delete(:topic_name) || raise("Mandatory :topic_name missing from jms.yml")
+class JMSTest < Minitest::Test
+  describe 'JMS Connection' do
+    before do
+      @config, @queue_name, @topic_name = read_config
     end
 
-    should 'Create Connection to the Broker/Server' do
+    it 'Create Connection to the Broker/Server' do
       connection = JMS::Connection.new(@config)
-      JMS::logger.info connection.to_s
-      assert_not_nil connection
+      JMS.logger.info connection.to_s
+      assert connection
       connection.close
     end
 
-    should 'Create and start Connection to the Broker/Server with block' do
+    it 'Create and start Connection to the Broker/Server with block' do
       JMS::Connection.start(@config) do |connection|
-        assert_not_nil connection
+        assert connection
       end
     end
 
-    should 'Create and start Connection to the Broker/Server with block and start one session' do
+    it 'Create and start Connection to the Broker/Server with block and start one session' do
       JMS::Connection.session(@config) do |session|
-        assert_not_nil session
+        assert session
       end
     end
 
-    should 'Start and stop connection' do
+    it 'Start and stop connection' do
       connection = JMS::Connection.new(@config)
-      assert_not_nil connection
+      assert connection
       assert_nil connection.start
 
       assert_nil connection.stop
       assert_nil connection.close
     end
 
-    should 'Create a session from the connection' do
+    it 'Create a session from the connection' do
       connection = JMS::Connection.new(@config)
-
-      session_parms = {
-        :transacted => true,
-        :options => JMS::Session::AUTO_ACKNOWLEDGE
-      }
-
-      session = connection.create_session
-      assert_not_nil session
+      session    = connection.create_session
+      assert session
       assert_equal session.transacted?, false
       assert_nil session.close
 
@@ -70,11 +45,10 @@ class JMSTest < Test::Unit::TestCase
       assert_nil connection.close
     end
 
-    should 'Create a session with a block' do
+    it 'Create a session with a block' do
       connection = JMS::Connection.new(@config)
-
       connection.session do |session|
-        assert_not_nil session
+        assert session
         assert_equal session.transacted?, false
       end
 
@@ -82,25 +56,19 @@ class JMSTest < Test::Unit::TestCase
       assert_nil connection.close
     end
 
-    should 'create a session without a block and throw exception' do
+    it 'create a session without a block and throw exception' do
       connection = JMS::Connection.new(@config)
 
-      assert_raise(RuntimeError) { connection.session }
+      assert_raises(RuntimeError) { connection.session }
 
       assert_nil connection.stop
       assert_nil connection.close
     end
 
-    should 'Create a session from the connection with params' do
+    it 'Create a session from the connection with params' do
       connection = JMS::Connection.new(@config)
-
-      session_parms = {
-        :transacted => true,
-        :options => JMS::Session::AUTO_ACKNOWLEDGE
-      }
-
-      session = connection.create_session(session_parms)
-      assert_not_nil session
+      session    = connection.create_session(transacted: true, options: JMS::Session::AUTO_ACKNOWLEDGE)
+      assert session
       assert_equal session.transacted?, true
       # When session is transacted, options are ignore, so ack mode must be transacted
       assert_equal session.acknowledge_mode, JMS::Session::SESSION_TRANSACTED
@@ -110,16 +78,10 @@ class JMSTest < Test::Unit::TestCase
       assert_nil connection.close
     end
 
-    should 'Create a session from the connection with block and params' do
+    it 'Create a session from the connection with block and params' do
       JMS::Connection.start(@config) do |connection|
-
-        session_parms = {
-          :transacted => true,
-          :options => JMS::Session::CLIENT_ACKNOWLEDGE
-        }
-
-        connection.session(session_parms) do |session|
-          assert_not_nil session
+        connection.session(transacted: true, options: JMS::Session::CLIENT_ACKNOWLEDGE) do |session|
+          assert session
           assert_equal session.transacted?, true
           # When session is transacted, options are ignore, so ack mode must be transacted
           assert_equal session.acknowledge_mode, JMS::Session::SESSION_TRANSACTED
@@ -127,33 +89,25 @@ class JMSTest < Test::Unit::TestCase
       end
     end
 
-    should 'Create a session from the connection with block and params opposite test' do
+    it 'Create a session from the connection with block and params opposite test' do
       JMS::Connection.start(@config) do |connection|
-
-        session_parms = {
-          :transacted => false,
-          :options => JMS::Session::AUTO_ACKNOWLEDGE
-        }
-
-        connection.session(session_parms) do |session|
-          assert_not_nil session
+        connection.session(transacted: false, options: JMS::Session::AUTO_ACKNOWLEDGE) do |session|
+          assert session
           assert_equal session.transacted?, false
           assert_equal session.acknowledge_mode, JMS::Session::AUTO_ACKNOWLEDGE
         end
       end
     end
 
-    context 'JMS Connection additional capabilities' do
-
-      should 'start an on_message handler' do
+    describe 'JMS Connection additional capabilities' do
+      it 'start an on_message handler' do
         JMS::Connection.start(@config) do |connection|
           value = nil
-          connection.on_message(:transacted => true, :queue_name => :temporary) do |message|
-            value = "received"
+          connection.on_message(transacted: true, queue_name: :temporary) do |message|
+            value = 'received'
           end
         end
       end
-
     end
 
   end

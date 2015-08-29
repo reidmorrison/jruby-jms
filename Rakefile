@@ -1,20 +1,23 @@
-lib = File.expand_path('../lib/', __FILE__)
-$:.unshift lib unless $:.include?(lib)
-
-raise "jruby-jms must be built with JRuby: try again with `jruby -S rake'" unless defined?(JRUBY_VERSION)
-
-require 'rubygems'
-require 'rubygems/package'
 require 'rake/clean'
 require 'rake/testtask'
+
+raise 'jruby-jms must be built with JRuby' unless defined?(JRUBY_VERSION)
+
+$LOAD_PATH.unshift File.expand_path('../lib', __FILE__)
 require 'jms/version'
 
-desc "Build gem"
-task :gem  do |t|
-  Gem::Package.build(Gem::Specification.load('jruby-jms.gemspec'))
+task :gem do
+  system 'gem build jruby-jms.gemspec'
 end
 
-desc "Run Test Suite"
+task :publish => :gem do
+  system "git tag -a v#{JMS::VERSION} -m 'Tagging #{JMS::VERSION}'"
+  system 'git push --tags'
+  system "gem push jruby-jms-#{JMS::VERSION}.gem"
+  system "rm jruby-jms-#{JMS::VERSION}.gem"
+end
+
+desc 'Run Test Suite'
 task :test do
   Rake::TestTask.new(:functional) do |t|
     t.test_files = FileList['test/*_test.rb']
@@ -24,7 +27,9 @@ task :test do
   Rake::Task['functional'].invoke
 end
 
-desc "Generate RDOC documentation"
+task :default => :test
+
+desc 'Generate RDOC documentation'
 task :doc do
   system "rdoc --main README.md --inline-source --quiet README.md `find lib -name '*.rb'`"
 end

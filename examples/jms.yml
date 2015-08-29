@@ -14,9 +14,8 @@ activemq:
   :username: system
   :password: manager
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 
 # ActiveMQ In VM Broker (Supports messaging within a JVM instance)
 activemq-invm:
@@ -24,20 +23,19 @@ activemq-invm:
   :broker_url: vm://mybroker
   :object_message_serialization_defered: true
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 
 # ActiveMQ with failover to slave instance
 activemq-ha:
   :factory: org.apache.activemq.ActiveMQConnectionFactory
   :broker_url: failover://(tcp://msg1:61616,tcp://msg2:61616)?randomize=false&timeout=30000&initialReconnectDelay=100&useExponentialBackOff=true
   :require_jars:
-    - ~/Applications/apache-activemq-5.5.0/activemq-all-5.5.0.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/slf4j-log4j12-1.5.11.jar
-    - ~/Applications/apache-activemq-5.5.0/lib/optional/log4j-1.2.14.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/activemq-all-5.11.1.jar
+    - /usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 
 # JBoss 4 Messaging
+jboss:
   :jndi_name: ConnectionFactory
   :jndi_context:
     java.naming.factory.initial: org.jnp.interfaces.NamingContextFactory
@@ -80,12 +78,14 @@ hornetq:
     java.naming.security.principal: guest
     java.naming.security.credentials: guest
   :require_jars:
-    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-commons.jar
-    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-core-client.jar
-    - ~/Applications/hornetq-2.4.0.Final/lib/hornetq-jms-client.jar
-    - ~/Applications/hornetq-2.4.0.Final/lib/jboss-jms-api.jar
-    - ~/Applications/hornetq-2.4.0.Final/lib/jnp-client.jar
-    - ~/Applications/hornetq-2.4.0.Final/lib/netty.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-commons.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-core-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/hornetq-jms-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/jboss-jms-api.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/jnp-client.jar
+    - /usr/local/Cellar/hornetq/2.4.0/libexec/lib/netty.jar
+  :queue_name: TestQueue
+  :topic_name: TestTopic
 
 # Tibco EMS
 ems:

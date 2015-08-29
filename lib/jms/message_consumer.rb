@@ -1,19 +1,3 @@
-################################################################################
-#  Copyright 2008, 2009, 2010, 2011  J. Reid Morrison
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-################################################################################
-
 # Interface javax.jms.MessageConsumer
 module JMS::MessageConsumer
   # Obtain a message from the Destination or Topic
@@ -36,8 +20,8 @@ module JMS::MessageConsumer
     end
   end
 
-  # For each message available to be consumed call the Proc supplied
-  # Returns the statistics gathered when :statistics => true, otherwise nil
+  # For each message available to be consumed call the supplied block
+  # Returns the statistics gathered when statistics: true, otherwise nil
   #
   # Parameters:
   #   :timeout How to timeout waiting for messages on the Queue or Topic
@@ -52,32 +36,33 @@ module JMS::MessageConsumer
   #      true  : This method will capture statistics on the number of messages received
   #              and the time it took to process them.
   #              The statistics can be reset by calling MessageConsumer::each again
-  #              with :statistics => true
+  #              with statistics: true
   #
-  #              The statistics gathered are returned when :statistics => true and :async => false
-  def each(params={}, &proc)
-    raise "Destination::each requires a code block to be executed for each message received" unless proc
+  #              The statistics gathered are returned when statistics: true and async: false
+  def each(params={}, &block)
+    raise(ArgumentError, 'Destination::each requires a code block to be executed for each message received') unless block
 
     message_count = nil
-    start_time = nil
+    start_time    = nil
 
     if params[:statistics]
       message_count = 0
-      start_time = Time.now
+      start_time    = Time.now
     end
 
     # Receive messages according to timeout
     while message = self.get(params) do
-      proc.call(message)
+      block.call(message)
       message_count += 1 if message_count
     end
 
     unless message_count.nil?
       duration = Time.now - start_time
-      {:messages => message_count,
-        :duration => duration,
-        :messages_per_second => duration > 0 ? (message_count/duration).to_i : 0,
-        :ms_per_msg => message_count > 0 ? (duration*1000.0)/message_count : 0
+      {
+        messages:            message_count,
+        duration:            duration,
+        messages_per_second: duration > 0 ? (message_count/duration).to_i : 0,
+        ms_per_msg:          message_count > 0 ? (duration*1000.0)/message_count : 0
       }
     end
   end
@@ -96,21 +81,21 @@ module JMS::MessageConsumer
   #              or when Destination::statistics is called. In this case MessageConsumer::statistics
   #              can be called several times during processing without affecting the end time.
   #              Also, the start time and message count is not reset until MessageConsumer::each
-  #              is called again with :statistics => true
+  #              is called again with statistics: true
   #
-  #              The statistics gathered are returned when :statistics => true and :async => false
+  #              The statistics gathered are returned when statistics: true and async: false
   #
   def on_message(params={}, &proc)
-    raise "MessageConsumer::on_message requires a code block to be executed for each message received" unless proc
+    raise(ArgumentError, 'MessageConsumer::on_message requires a code block to be executed for each message received') unless proc
 
-    @listener = JMS::MessageListenerImpl.new(params,&proc)
-    self.setMessageListener @listener
+    @listener = JMS::MessageListenerImpl.new(params, &proc)
+    self.setMessageListener(@listener)
   end
 
   # Return the current statistics for a running MessageConsumer::on_message
   def on_message_statistics
     stats = @listener.statistics if @listener
-    raise "First call MessageConsumer::on_message with :statistics=>true before calling MessageConsumer::statistics()" unless stats
+    raise(ArgumentError, 'First call MessageConsumer::on_message with statistics: true before calling MessageConsumer::statistics()') unless stats
     stats
   end
 
