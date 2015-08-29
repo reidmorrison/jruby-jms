@@ -5,6 +5,7 @@ module JMS
   # For internal use only by JMS::Connection
   class MessageListenerImpl
     include JMS::MessageListener
+    include SemanticLogger::Loggable
 
     # Parameters:
     #   :statistics Capture statistics on how many messages have been read
@@ -36,25 +37,21 @@ module JMS
           @message_count += 1
           @last_time     = Time.now
         end
-        @proc.call message
-      rescue SyntaxError, NameError => boom
-        JMS.logger.error "Unhandled Exception processing JMS Message. Doesn't compile: " + boom
-        JMS.logger.error "Ignoring poison message:\n#{message.inspect}"
-        JMS.logger.error boom.backtrace.join("\n")
-      rescue StandardError => bang
-        JMS.logger.error "Unhandled Exception processing JMS Message. Doesn't compile: " + bang
-        JMS.logger.error "Ignoring poison message:\n#{message.inspect}"
-        JMS.logger.error bang.backtrace.join("\n")
+        logger.benchmark_debug('Message processed') do
+          @proc.call message
+        end
+      rescue SyntaxError, NameError => exc
+        logger.error "Ignoring poison message:\n#{message.inspect}", exc
+      rescue StandardError => exc
+        logger.error "Ignoring poison message:\n#{message.inspect}", exc
       rescue Exception => exc
-        JMS.logger.error "Unhandled Exception processing JMS Message. Exception occurred:\n#{exc}"
-        JMS.logger.error "Ignoring poison message:\n#{message.inspect}"
-        JMS.logger.error exc.backtrace.join("\n")
+        logger.error "Ignoring poison message:\n#{message.inspect}", exc
       end
     end
 
     # Return Statistics gathered for this listener
     def statistics
-      raise(ArgumentError, 'First call MessageConsumer::on_message with :statistics=>true before calling MessageConsumer::statistics()') unless @message_count
+      raise(ArgumentError, 'First call MessageConsumer::on_message with statistics: true before calling MessageConsumer::statistics()') unless @message_count
       duration = (@last_time || Time.now) - @start_time
       {
         messages:            @message_count,

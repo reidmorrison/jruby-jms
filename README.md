@@ -2,7 +2,11 @@
 
 * http://github.com/reidmorrison/jruby-jms
 
-### Introduction
+jruby-jms is a complete JRuby API into Java Messaging Specification (JMS) V1.1.
+
+Note: jruby-jms is for JRuby only.
+
+### Design
 
 jruby-jms attempts to "rubify" the Java JMS API without
 compromising performance. It does this by sprinkling "Ruby-goodness" into the
@@ -68,7 +72,7 @@ for passing messages between threads in the same JVM.
 
 In order to connect to any broker the Client JMS application must create a
 connection. In traditional JMS a ConnectionFactory is used to create connections.
-In jruby-jms the JMS::Connection takes care of the complexities of dealing with
+In jruby-jms the `JMS::Connection` takes care of the complexities of dealing with
 the factory class, just pass the required parameters to Connection.new and
 jruby-jms takes care of the rest.
 
@@ -135,19 +139,18 @@ JMS::Connection.session(config) do |session|
 end
 ```
 
-## Overview
+## More Examples
 
-jruby-jms is a complete JRuby API into the Java Messaging Specification (JMS) V1.1
-followed by several JMS Providers.
+There are several more examples available at https://github.com/reidmorrison/jruby-jms/tree/master/examples
 
 ## Threading
 
-A JMS::Connection instance can be shared between threads, whereas a session,
+A `JMS::Connection` instance can be shared between threads, whereas a session,
 consumer, producer, and any artifacts created by the session should only be
 used by one thread at a time.
 
 For consumers, it is recommended to create a session for each thread and leave
-that thread blocked on Consumer.receive. Or, even better use Connection.on_message
+that thread blocked on `Consumer#receive`. Or, even better use `Connection#on_message`
 which will create a session, within which any message received from the specified
 queue or topic will be passed to the block.
 
@@ -155,7 +158,7 @@ queue or topic will be passed to the block.
 
 jruby-jms detects the logging available in the current environment.
 When running under Rails it will use the Rails logger, otherwise it will use the
-standard Ruby logger. The logger can also be replaced by calling JMS.logger=
+standard Ruby logger. The logger can also be replaced by calling `JMS.logger=`
 
 ## Dependencies
 
@@ -163,7 +166,7 @@ standard Ruby logger. The logger can also be replaced by calling JMS.logger=
 
 In order to communicate with a JMS V 1.1 provider jruby-jms needs the jar files supplied
 by the JMS provider. As in the examples above the jar files can be specified in
-the configuration element :require_jars. Otherwise, the jars must be explicitly
+the configuration element `:require_jars`. Otherwise, the jars must be explicitly
 required in the Ruby code:
 
 ```ruby
@@ -173,7 +176,7 @@ require '/usr/local/Cellar/activemq/5.11.1/libexec/lib/optional/log4j-1.2.17.jar
 
 ### JRuby
 
-jruby-jms has been tested against JRuby 1.5.1, 1.6.1, 1.7, and JRuby 9.0.0.0
+jruby-jms has been tested against JRuby 1.7, and JRuby 9.0.0.0
 
 ## Versioning
 

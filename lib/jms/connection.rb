@@ -1,3 +1,4 @@
+require 'semantic_logger'
 # Module: Java Messaging System (JMS) Interface
 module JMS
   # Every JMS session must have at least one Connection instance
@@ -38,6 +39,8 @@ module JMS
   # See: http://download.oracle.com/javaee/6/api/javax/jms/Connection.html
   #
   class Connection
+    include SemanticLogger::Loggable
+
     # Create a connection to the JMS provider, start the connection,
     # call the supplied code block, then close the connection upon completion
     #
@@ -85,11 +88,11 @@ module JMS
     # Returns nil
     def fetch_dependencies(jar_list)
       jar_list.each do |jar|
-        JMS.logger.debug "Loading Jar File:#{jar}"
+        logger.debug "Loading Jar File:#{jar}"
         begin
           require jar
         rescue Exception => exc
-          JMS.logger.error "Failed to Load Jar File:#{jar}. #{exc.to_s}"
+          logger.error "Failed to Load Jar File:#{jar}", exc
         end
       end if jar_list
 
@@ -181,16 +184,16 @@ module JMS
       options.delete(:jndi_name)
       options.delete(:jndi_context)
 
-      JMS.logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
+      logger.debug "Using Factory: #{connection_factory.java_class}" if connection_factory.respond_to? :java_class
       options.each_pair do |key, val|
         next if [:username, :password].include?(key)
 
         method = key.to_s+'='
         if connection_factory.respond_to? method
           connection_factory.send method, val
-          JMS.logger.debug "   #{key} = #{connection_factory.send key.to_sym}" if connection_factory.respond_to? key.to_sym
+          logger.debug "   #{key} = #{connection_factory.send key.to_sym}" if connection_factory.respond_to? key.to_sym
         else
-          JMS.logger.warn "#{connection_factory.java_class} does not understand option: :#{key}=#{val}, ignoring :#{key}" if connection_factory.respond_to? :java_class
+          logger.warn "#{connection_factory.java_class} does not understand option: :#{key}=#{val}, ignoring :#{key}" if connection_factory.respond_to? :java_class
         end
       end
 
@@ -498,7 +501,6 @@ module JMS
     #      producer.send(session.message("Hello World"))
     #   end
     def create_session_pool(params={})
-      require 'jms/session_pool' unless defined? JMS::SessionPool
       JMS::SessionPool.new(self, params)
     end
 

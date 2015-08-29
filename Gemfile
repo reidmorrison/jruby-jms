@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
-gem 'rake'
-gem 'gene_pool'
+gemspec
 
+gem 'rake'
 gem 'minitest'
 gem 'minitest-reporters'

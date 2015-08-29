@@ -6,10 +6,8 @@ class JMSTest < Minitest::Test
     before do
       @config, @queue_name, @topic_name = read_config
       @pool_params                      = {
-        pool_name:         'Test::JMS::SessionPool',
         pool_size:         10,
-        pool_warn_timeout: 5.0,
-        #pool_logger:
+        pool_warn_timeout: 5.0
       }
     end
 

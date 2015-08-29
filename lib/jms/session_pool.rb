@@ -14,8 +14,6 @@ module JMS
   #   see regular session parameters from: JMS::Connection#initialize
   #
   # Additional parameters for controlling the session pool itself
-  #   :pool_name         Name of the pool as it shows up in the logger.
-  #                      Default: 'JMS::SessionPool'
   #   :pool_size         Maximum Pool Size. Default: 10
   #                      The pool only grows as needed and will never exceed
   #                      :pool_size
@@ -25,9 +23,8 @@ module JMS
   #   :pool_warn_timeout Number of seconds to wait before logging a warning when a
   #                      session in the pool is not available
   #                      Default: 5
-  #   :pool_logger       Supply a logger that responds to #debug, #info, #warn and #debug?
-  #                      For example: Rails.logger
-  #                      Default: JMS.logger
+  #   :pool_name         Name of the pool as it shows up in the logger.
+  #                      Default: 'JMS::SessionPool'
   # Example:
   #   session_pool = connection.create_session_pool(config)
   #   session_pool.session do |session|
@@ -38,16 +35,18 @@ module JMS
       # Save Session params since it will be used every time a new session is
       # created in the pool
       session_params = params.nil? ? {} : params.dup
-      logger         = session_params[:pool_logger] || JMS.logger
-      # Define how GenePool can create new sessions
+      logger         = SemanticLogger[session_params[:pool_name] || self.class]
+
+      # Use GenePool can create and manage the pool of sessions
       @pool          = GenePool.new(
-        name:         session_params[:pool_name] || self.class.name,
+        name:         '',
         pool_size:    session_params[:pool_size] || 10,
         warn_timeout: session_params[:pool_warn_timeout] || 5,
         timeout:      session_params[:pool_timeout] || 60,
         close_proc:   nil,
-        logger:       logger) do
-        session = connection.create_session(session_params)
+        logger:       logger
+      ) do
+        session                      = connection.create_session(session_params)
         # Turn on Java class persistence: https://github.com/jruby/jruby/wiki/Persistence
         session.class.__persistent__ = true
         session
@@ -55,7 +54,7 @@ module JMS
 
       # Handle connection failures
       connection.on_exception do |jms_exception|
-        logger.error "JMS Connection Exception has occurred: #{jms_exception}" if logger
+        logger.error "JMS Connection Exception has occurred: #{jms_exception.inspect}"
       end
     end
 

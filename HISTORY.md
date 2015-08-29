@@ -1,3 +1,14 @@
+## 1.2.0 (2015-08-29)
+
+* Tested against JRuby 9.0.0.0
+* Drop support for JRuby 1.5 and 1.6
+* Tested against ActiveMQ 5.11, and HornetQ 2.4
+* Raises ArgumentError instead of RuntimeError for missing arguments
+* Update tests
+* Upgrade to Minitest 5.8
+* Switch to Ruby 1.9 hash syntax
+* Reformat code
+
 ## 1.1.0 (2014-04-10)
 
 * Support Oracle AQ 11gR2
@@ -24,16 +35,16 @@
 
 * Compatibility with JRuby 1.6
 * I hate doing this, but unfortunately there is a small breaking change in this release:
-** We can no longer pass symbols into the following methods:
-*** jms_delivery_mode
-*** jms_delivery_mode=
-** Just rename existing uses of the above methods to:
-*** jms_delivery_mode_sym
-*** jms_delivery_mode_sym=
+    * We can no longer pass symbols into the following methods:
+        * jms_delivery_mode
+        * jms_delivery_mode=
+    * Just rename existing uses of the above methods to:
+        * jms_delivery_mode_sym
+        * jms_delivery_mode_sym=
 * Added Session Pool - requires GenePool as a dependency if used
 * Generate warning log entry for any parameters not known to the ConnectionFactory
 * Use java_import for all javax.jms classes
-** Rename all Java source files to match new names
+    * Rename all Java source files to match new names
 
 ## 0.10.1 (2011-02-21)
 

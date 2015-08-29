@@ -1,0 +1,39 @@
+PATH
+  remote: .
+  specs:
+    jruby-jms (1.2.0-java)
+      gene_pool
+      semantic_logger
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ansi (1.5.0)
+    builder (3.2.2)
+    gene_pool (1.4.1)
+      thread_safe
+    minitest (5.8.0)
+    minitest-reporters (1.0.20)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
+    rake (10.4.2)
+    ruby-progressbar (1.7.5)
+    semantic_logger (2.15.0)
+      sync_attr (~> 2.0)
+      thread_safe (~> 0.1)
+    sync_attr (2.0.0)
+    thread_safe (0.3.5-java)
+
+PLATFORMS
+  java
+
+DEPENDENCIES
+  jruby-jms!
+  minitest
+  minitest-reporters
+  rake
+
+BUNDLED WITH
+   1.10.6
