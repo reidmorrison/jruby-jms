@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
-class JMSTest < Minitest::Test
-  describe 'JMS Session' do
+class MessageTest < Minitest::Test
+  describe 'JMS::Message' do
     before do
       @config, @queue_name, @topic_name = read_config
     end

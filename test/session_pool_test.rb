@@ -1,8 +1,8 @@
 require_relative 'test_helper'
 require 'timeout'
 
-class JMSTest < Minitest::Test
-  describe 'JMS Session' do
+class SessionPoolTest < Minitest::Test
+  describe JMS::SessionPool do
     before do
       @config, @queue_name, @topic_name = read_config
       @pool_params                      = {

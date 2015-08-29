@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 
-class JMSTest < Minitest::Test
-  describe 'JMS Connection' do
+class ConnectionTest < Minitest::Test
+  describe JMS::Connection do
     before do
       @config, @queue_name, @topic_name = read_config
     end
@@ -99,7 +99,7 @@ class JMSTest < Minitest::Test
       end
     end
 
-    describe 'JMS Connection additional capabilities' do
+    describe 'additional capabilities' do
       it 'start an on_message handler' do
         JMS::Connection.start(@config) do |connection|
           value = nil

@@ -1,8 +1,8 @@
 require_relative 'test_helper'
 require 'yaml'
 
-class JMSTest < Minitest::Test
-  describe 'JMS Session' do
+class SessionTest < Minitest::Test
+  describe 'JMS::Session' do
     before do
       @config, @queue_name, @topic_name = read_config
     end

@@ -1,6 +1,5 @@
 require 'java'
 require 'jms/version'
-require 'jms/jms'
 require 'jms/connection'
 require 'semantic_logger'
 
