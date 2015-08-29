@@ -88,6 +88,9 @@ module JMS::MessageConsumer
   def on_message(params={}, &proc)
     raise(ArgumentError, 'MessageConsumer::on_message requires a code block to be executed for each message received') unless proc
 
+    # Turn on Java class persistence: https://github.com/jruby/jruby/wiki/Persistence
+    self.class.__persistent__ = true
+
     @listener = JMS::MessageListenerImpl.new(params, &proc)
     self.setMessageListener(@listener)
   end

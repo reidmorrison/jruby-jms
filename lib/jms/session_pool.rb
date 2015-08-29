@@ -47,7 +47,10 @@ module JMS
         timeout:      session_params[:pool_timeout] || 60,
         close_proc:   nil,
         logger:       logger) do
-        connection.create_session(session_params)
+        session = connection.create_session(session_params)
+        # Turn on Java class persistence: https://github.com/jruby/jruby/wiki/Persistence
+        session.class.__persistent__ = true
+        session
       end
 
       # Handle connection failures

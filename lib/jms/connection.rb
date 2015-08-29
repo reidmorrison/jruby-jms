@@ -42,12 +42,12 @@ module JMS
     # call the supplied code block, then close the connection upon completion
     #
     # Returns the result of the supplied block
-    def self.start(params = {}, &proc)
-      raise "Missing mandatory Block when calling JMS::Connection.start" unless proc
+    def self.start(params = {}, &block)
+      raise(ArgumentError, 'Missing mandatory Block when calling JMS::Connection.start') unless block
       connection = Connection.new(params)
       connection.start
       begin
-        proc.call(connection)
+        block.call(connection)
       ensure
         connection.close
       end
@@ -63,9 +63,9 @@ module JMS
     # Note: It is important that each thread have its own session to support transactions
     #       This method will also start the session immediately so that any
     #       consumers using this session will start immediately
-    def self.session(params = {}, &proc)
+    def self.session(params = {}, &block)
       self.start(params) do |connection|
-        connection.session(params, &proc)
+        connection.session(params, &block)
       end
     end
 
@@ -248,11 +248,11 @@ module JMS
     #        session is transacted.
     #     Default: JMS::Session::AUTO_ACKNOWLEDGE
     #
-    def session(params={}, &proc)
-      raise "Missing mandatory Block when calling JMS::Connection#session" unless proc
+    def session(params={}, &block)
+      raise(ArgumentError, 'Missing mandatory Block when calling JMS::Connection#session') unless block
       session = self.create_session(params)
       begin
-        proc.call(session)
+        block.call(session)
       ensure
         session.close
       end
@@ -436,7 +436,7 @@ module JMS
     #       since on_message will Not be called if the connection is lost
     #
     def on_message(params, &block)
-      raise "JMS::Connection must be connected prior to calling JMS::Connection::on_message" unless @sessions && @consumers
+      raise 'JMS::Connection must be connected prior to calling JMS::Connection::on_message' unless @sessions && @consumers
 
       consumer_count = params[:session_count] || 1
       consumer_count.times do

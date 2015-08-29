@@ -59,7 +59,7 @@ class JMSTest < Minitest::Test
     it 'create a session without a block and throw exception' do
       connection = JMS::Connection.new(@config)
 
-      assert_raises(RuntimeError) { connection.session }
+      assert_raises(ArgumentError) { connection.session }
 
       assert_nil connection.stop
       assert_nil connection.close
