@@ -36,6 +36,10 @@ If not using Bundler:
 
     gem install jruby-jms
 
+### Documentation
+
+* [API Reference](http://www.rubydoc.info/gems/jruby-jms)
+
 ### Simplification
 
 One of the difficulties with the regular JMS API is that it uses completely

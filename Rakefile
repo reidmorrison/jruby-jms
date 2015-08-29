@@ -13,8 +13,8 @@ end
 task :publish => :gem do
   system "git tag -a v#{JMS::VERSION} -m 'Tagging #{JMS::VERSION}'"
   system 'git push --tags'
-  system "gem push jruby-jms-#{JMS::VERSION}.gem"
-  system "rm jruby-jms-#{JMS::VERSION}.gem"
+  system "gem push jruby-jms-#{JMS::VERSION}-java.gem"
+  system "rm jruby-jms-#{JMS::VERSION}-java.gem"
 end
 
 desc 'Run Test Suite'
