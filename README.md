@@ -1,4 +1,4 @@
-## jruby-jms
+# jruby-jms ![](http://ruby-gem-downloads-badge.herokuapp.com/jruby-jms?type=total)
 
 * http://github.com/reidmorrison/jruby-jms
 
