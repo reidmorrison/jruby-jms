@@ -1,4 +1,5 @@
-# jruby-jms ![](http://ruby-gem-downloads-badge.herokuapp.com/jruby-jms?type=total)
+# jruby-jms
+![](https://img.shields.io/gem/dt/jruby-jms.svg)  ![](https://img.shields.io/badge/status-production%20ready-blue.svg)
 
 * http://github.com/reidmorrison/jruby-jms
 
@@ -197,3 +198,7 @@ This project uses [Semantic Versioning](http://semver.org/).
 ## Author
 
 Reid Morrison :: reidmo@gmail.com :: @reidmorrison
+
+## Contributors
+
+[Contributors](https://github.com/reidmorrison/jruby-jms/graphs/contributors)
