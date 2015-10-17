@@ -197,8 +197,6 @@ This project uses [Semantic Versioning](http://semver.org/).
 
 ## Author
 
-Reid Morrison :: reidmo@gmail.com :: @reidmorrison
-
-## Contributors
+[Reid Morrison](https://github.com/reidmorrison)
 
 [Contributors](https://github.com/reidmorrison/jruby-jms/graphs/contributors)
