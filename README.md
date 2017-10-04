@@ -169,7 +169,7 @@ To enable Semantic Logger in a rails logger, include the gem [rails_semantic_log
 For standalone installations:
 
 ```ruby
-SemanticLogger.add_appender('test.log', &SemanticLogger::Appender::Base.colorized_formatter)
+SemanticLogger.add_appender(file_name: 'test.log', formatter: :color)
 SemanticLogger.default_level = :info
 ```
 

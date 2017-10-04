@@ -37,7 +37,7 @@ module JMS
           @message_count += 1
           @last_time     = Time.now
         end
-        logger.benchmark_debug('Message processed') do
+        logger.measure_debug('Message processed') do
           @proc.call message
         end
       rescue SyntaxError, NameError => exc

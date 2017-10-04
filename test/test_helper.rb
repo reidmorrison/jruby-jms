@@ -11,8 +11,8 @@ require 'jms'
 
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
-SemanticLogger.add_appender('test.log', &SemanticLogger::Appender::Base.colorized_formatter)
-SemanticLogger.default_level = :trace
+SemanticLogger.add_appender(file_name: 'test.log', formatter: :color)
+SemanticLogger.default_level                       = :trace
 
 # Set Log4J properties file so that it does not need to be in the CLASSPATH
 java.lang.System.properties['log4j.configuration'] = 'test/log4j.properties'
