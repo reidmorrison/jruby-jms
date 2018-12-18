@@ -9,14 +9,29 @@ module JMS::MessageConsumer
   #         Note: Messages may still be on the queue, but the broker has not supplied any messages
   #                   in the time interval specified
   #    Default: 0
+  # :buffered_message - consume Oracle AQ buffered message
+  #    Default: false
   def get(params={})
     timeout = params[:timeout] || 0
+    buffered_message = params[:buffered_message] || false
     if timeout == -1
-      self.receive
+       if buffered_message
+         self.bufferReceive
+       else
+         self.receive
+       end
     elsif timeout == 0
-      self.receiveNoWait
+       if buffered_message
+         self.bufferReceiveNoWait
+       else
+         self.receiveNoWait
+       end
     else
-      self.receive(timeout)
+       if buffered_message
+         self.bufferReceive(timeout)
+       else
+         self.receive(timeout)
+       end
     end
   end
 
