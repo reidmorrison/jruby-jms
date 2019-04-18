@@ -161,10 +161,10 @@ queue or topic will be passed to the block.
 
 ## Logging
 
-jruby-jms uses [Semantic Logger](http://reidmorrison.github.io/semantic_logger/) for logging since it is
+jruby-jms uses [Semantic Logger](https://github.com/rocketjob/semantic_logger) for logging since it is
 fully thread-aware, uses in-memory queue based logging for performance, and has several other useful features.
 
-To enable Semantic Logger in a rails logger, include the gem [rails_semantic_logger](http://reidmorrison.github.io/semantic_logger/rails.html)
+To enable Semantic Logger in a rails logger, include the gem [rails_semantic_logger](https://github.com/rocketjob/rails_semantic_logger)
 
 For standalone installations:
 
